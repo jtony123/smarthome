@@ -1,0 +1,72 @@
+.dashboard {
+	color: white;
+	background-color: black;
+	font-family: Roboto;
+	}
+	
+.dashboardBackground {
+	background-color: black;
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+	width: 100%;
+}
+
+.dashboardClockFont {
+	color: white;
+	font-size: 180px;
+	font-size: 12.0em;
+	font-size: 20vw;
+	margin: 0;
+	padding-left: 30px;
+}
+
+.dashboardTempFont {
+	color: white;
+	font-size: 5.0em;
+	text-align: center;
+	margin: 0;
+	padding-top: 25px;
+	
+}
+
+.dashboardRow:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+.dashboardColumn {
+	float: left;
+	padding: 10px;
+}
+
+.dashboardColumnLeft {
+	float: left;
+	width: 65vw;
+	height: 100vh;
+}
+
+.dashboardColumnRight {
+	float: right;
+	width: 34vw;
+	height: 100vh;
+	border-left: 1px solid white;
+}
+
+.dashboardClockTick {
+	color: white;
+	animation-name: ticking;
+	animation-duration: 1s;
+	animation-iteration-count: infinite;
+}
+
+@keyframes ticking {
+	#from {opacity:0.8;}
+	to {opacity:0.5;}
+}
+
+	
+.h1 {
+	margin: 0;
+}
