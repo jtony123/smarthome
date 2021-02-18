@@ -14,14 +14,14 @@ export default class Clock extends Component {
 			//time: moment().format('hh') + '.' + moment().format('mm'),
 			hour: moment().format('hh'),
 			colon: ':',
-			minute: moment().format('mm')
+			minute: moment().format('mm'),
+			timerInterval: null
 			}
 			//this.clicked = this.clicked.bind(this)
     }
     
     	componentDidMount() {
-		setInterval(()=>{
-			
+		let timerInterval = setInterval(()=>{
 				this.setState({
 					//time: moment().format('hh') + '.' + moment().format('mm'),
 					hour: moment().format('hh'),
@@ -30,7 +30,13 @@ export default class Clock extends Component {
 				})
 			
 		},1000)
+		this.setState({timerInterval: timerInterval});
 	}
+	
+	componentWillUnmount(){
+        console.log("Clock componentWillUnmount");
+        clearInterval(this.state.timerInterval)
+    }
 	
 	
 	

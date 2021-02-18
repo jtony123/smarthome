@@ -3,13 +3,16 @@ import 'fontsource-roboto';
 //import './App.css';
 import React, { Component } from 'react';
 import Clock from './Clock';
+import SunLineChart from './SunLineChart';
 
 import styles from './dashboard.module.css';
 
 class App extends Component {
     constructor(props) {
         super(props);
-        this.state = { apiResponse: '' };
+        this.state = { apiResponse: '',
+                        apiTempReqTimer: null
+                        };
     }
 
     callAPI() {
@@ -20,18 +23,28 @@ class App extends Component {
     }
 
     componentDidMount() {
-      console.log("componentDidMount");
+      console.log("App componentDidMount");
         this.callAPI();
-        //console.log(this.state.apiResponse);
+        let apiTempReqTimer = setInterval(()=>{
+                            this.callAPI();
+                        },30000)
+        this.setState({ apiTempReqTimer: apiTempReqTimer })
+    }
+    
+    
+    componentWillUnmount(){
+        console.log("App componentWillUnmount");
+        clearInterval(this.state.apiTempReqTimer)
     }
 
     render() {
-        console.log(this.state.apiResponse);
+        //console.log(this.state.apiResponse);
         return (
         <div className={styles.dashboardBackground}>
         <div className={styles.dashboardRow}>
             <div className={styles.dashboardColumnLeft}>
                 <Clock/>
+                <SunLineChart/>
             </div>
             
             <div className={styles.dashboardColumnRight}>
@@ -45,26 +58,3 @@ class App extends Component {
 }
 
 export default App;
-
-//function App() {
-  //return (
-    //<div className="App">
-      //<header className="App-header">
-        //<img src={logo} className="App-logo" alt="logo" />
-        //<p>
-          //Edit <code>src/App.js</code> and save to reload.
-        //</p>
-        //<a
-          //className="App-link"
-          //href="https://reactjs.org"
-          //target="_blank"
-          //rel="noopener noreferrer"
-        //>
-          //Learn React
-        //</a>
-      //</header>
-    //</div>
-  //);
-//}
-
-//export default App;
