@@ -10,8 +10,10 @@ import styles from './dashboard.module.css';
 class App extends Component {
     constructor(props) {
         super(props);
+        this.parentDivRef = React.createRef();
         this.state = { apiResponse: '',
-                        apiTempReqTimer: null
+                        apiTempReqTimer: null,
+                        elwidth: 0
                         };
     }
 
@@ -24,6 +26,13 @@ class App extends Component {
 
     componentDidMount() {
       console.log("App componentDidMount");
+
+      const el = this.parentDivRef;
+      var elWidth = el.offsetWidth;
+
+      this.setState({
+        elwidth: elWidth,
+      });
         this.callAPI();
         let apiTempReqTimer = setInterval(()=>{
                             this.callAPI();
@@ -42,9 +51,11 @@ class App extends Component {
         return (
         <div className={styles.dashboardBackground}>
         <div className={styles.dashboardRow}>
-            <div className={styles.dashboardColumnLeft}>
+            <div className={styles.dashboardColumnLeft} ref={this.parentDivRef}>
                 <Clock/>
-                <SunLineChart/>
+                <SunLineChart 
+                    parentWidth={this.state.elwidth}
+                />
             </div>
             
             <div className={styles.dashboardColumnRight}>
