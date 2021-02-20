@@ -3,123 +3,195 @@ import * as d3 from 'd3';
 
 import styles from './dashboard.module.css';
 
+const c4 = 0.0014518;
+const c3 = 0.0696863;
+const c2 = 0.881758;
+const c1 = 1.09254;
+const c = 0.210586;
+
+
+const data = () => {
+
+    var data = [];
+    
+    var obj = {};
+    obj.x = 0;
+    obj.y = 0;
+    data.push(obj);
+
+      for(var i =1; i<=24; i++){
+
+        var obj = {};
+        obj.x = i;
+
+        var i4 = Math.pow(i,4);
+        var i3 = Math.pow(i,3);
+        var i2 = Math.pow(i,2);
+
+
+        obj.y = (c4*i4) - (c3*i3) + (c2*i2) - (c1*i) + c;
+        data.push(obj);
+      }
+
+      return data;
+}
+
+
 export default class SunLineChart extends Component{
 
     constructor(props) {
         super(props);
         this.lineChartRef = React.createRef();
+        console.log(this.props.parentWidth);
         this.state = {
             height: 300,
             width: 600,
-            margin: { top: 50, right: 0, bottom: 5, left: 0, between: 20, yaxisMargin: 25 },
-            data: []
+            margin: { top: 50, right: 0, bottom: 5, left: 0, between: 20, yaxisMargin: 0 },
+            timerInterval: null,
+            c4 : 0.0014518,
+            c3 : 0.0696863,
+            c2 : 0.881758,
+            c1 : 1.09254,
+            c : 0.210586,
+            data: data
         }
 
         this.xScale = d3.scaleLinear()
-            .range([0, 600])
+            .range([0, this.state.width])
             .domain([0, 24]);
         
         this.yScale = d3.scaleLinear()
             .range([(this.state.height - (this.state.margin.top + this.state.margin.bottom)), 0])
             .domain([0, 24]);
 
-        this.yScale2 = d3.scaleLinear()
-            .range([(this.state.height - (this.state.margin.top + this.state.margin.bottom)), 0])
-            .domain([24, 0]);
 
-        this.xAxis = d3.axisBottom();//.tickFormat(d3.timeFormat("%d %b"));
+        this.xAxis = d3.axisBottom();
 
         this.yAxis = d3.axisLeft(this.yScale).ticks(12);
 
 
         this.drawChart = this.drawChart.bind(this);
+
+        this.getTimeDecimal = this.getTimeDecimal.bind(this);
+        this.getTimeY = this.getTimeY.bind(this);
     }
 
-    //lineChartRef = React.createRef();
+    lineChartRef = React.createRef();
+
+   
 
     componentDidMount() {
-        console.log("SunLineChart componentDidMount");
-        //console.log();
-        var data = [];
+        console.log("SunLineChart componentDidMount ");
 
-          for(var i =1; i<=24; i++){
-
-            var obj = {};
-            obj.x = i;
-            obj.y = i;
-            data.push(obj);
-          }
-
-        this.setState({
-            width: this.lineChartRef.current.offsetWidth,
-            data: data
-          });
+        let timerInterval = setInterval(()=>{
+            this.redrawChart();
+        }, 5000);
 
         this.drawChart();
 
     }
 
-
-    drawChart() {
-        console.log("drawChart() called");
-
-        var data = [];
-        // var c = 0.142294;
-        // var c4 = 0.000709837;
-        // var c3 = 0.0340722;
-        // var c2 = 0.429864;
-        // var c1 = 0.50396;
-
-       
-        var c4 = 0.0014518;
-        var c3 = 0.0696863;
-        var c2 = 0.881758;
-        var c1 = 1.09254;
-        var c = 0.210586;
-        
-        var obj = {};
-        obj.x = 0;
-        obj.y = 0;
-        data.push(obj);
-
-          for(var i =1; i<=24; i++){
-
-            var obj = {};
-            obj.x = i;
-
-            var i4 = Math.pow(i,4);
-            var i3 = Math.pow(i,3);
-            var i2 = Math.pow(i,2);
+    componentWillUnmount() {
+        //window.removeEventListener('resize');
+      }
 
 
-            obj.y = (c4*i4) - (c3*i3) + (c2*i2) - (c1*i) + c;
-            data.push(obj);
-          }
 
+      getTimeDecimal(){
 
         var d = new Date();
         var hrs = d.getHours();
         var mins = d.getMinutes();
         var minhrs = mins/60;
         var time = hrs + minhrs;
-        time = 20.0
+        //time = 20.0
+
+        // var timeY = (c4 * Math.pow(time,4)) 
+        //             - (c3 * Math.pow(time,3)) 
+        //             + (c2 * Math.pow(time,2)) 
+        //             - (c1*time) + c;
+
+        return time;
+      }
+
+      getTimeY(time){
 
         var timeY = (c4 * Math.pow(time,4)) 
-                    - (c3 * Math.pow(time,3)) 
-                    + (c2 * Math.pow(time,2)) 
-                    - (c1*time) + c;
+        - (c3 * Math.pow(time,3)) 
+        + (c2 * Math.pow(time,2)) 
+        - (c1*time) + c;
+
+        return timeY;
+      }
 
 
+    redrawChart() {
+
+        console.log("redrawChart() called ");
+
+        var time = this.getTimeDecimal();
+        var timeY = this.getTimeY(time);
+
+        // var d = new Date();
+        // var hrs = d.getHours();
+        // var mins = d.getMinutes();
+        // var minhrs = mins/60;
+        // var time = hrs + minhrs;
+        // //time = 20.0
+
+        // var timeY = (c4 * Math.pow(time,4)) 
+        //             - (c3 * Math.pow(time,3)) 
+        //             + (c2 * Math.pow(time,2)) 
+        //             - (c1*time) + c;
+        
+        let xScale = this.xScale;
+        let yScale = this.yScale;
+        var svgDoc = d3.select('svg#linechartsvg');
+
+        svgDoc.select("sunpositionCircle")
+            .attr("cx", function(){ return xScale(time)})
+            .attr("cy", function(){ return yScale(timeY)})
+
+        svgDoc.select("sunpositionnightCircle")
+                .attr("cx", function(){ return xScale(time)})
+                .attr("cy", function(){ return yScale(timeY)})
+
+
+    }
+
+
+    drawChart() {
+
+        console.log("drawChart() called " + this.props.parentWidth);
+        let data = this.state.data;
+        
+        // var d = new Date();
+        // var hrs = d.getHours();
+        // var mins = d.getMinutes();
+        // var minhrs = mins/60;
+        // var time = hrs + minhrs;
+        // //time = 20.0
+
+        // var timeY = (c4 * Math.pow(time,4)) 
+        //             - (c3 * Math.pow(time,3)) 
+        //             + (c2 * Math.pow(time,2)) 
+        //             - (c1*time) + c;
+
+        var time = this.getTimeDecimal();
+        var timeY = this.getTimeY(time);
 
         let xScale = this.xScale;
         let yScale = this.yScale;
-        let yScale2 = this.yScale2;
         let xAxis = this.xAxis.scale(xScale);
         let yAxis = this.yAxis;
         var height = this.state.height;// - this.state.margin.top - this.state.margin.bottom;
 
+        let st = styles.svgContent;
         var svgDoc = d3.select('svg#linechartsvg')
-            .attr("height", this.state.height)
+            //.attr("height", this.state.height)
+            .attr("preserveAspectRatio", "xMinYMin meet")
+            .attr("viewBox", "0 0 600 600")
+            .classed(st, true);
             ;
 
             // svgDoc.select("g.x.axis")
@@ -139,29 +211,77 @@ export default class SunLineChart extends Component{
             .x(function (d) { return xScale(d.x); })
             .y(function (d) { return yScale(d.y); });
 
-            svgDoc.select("g.sunpath")
-            .attr("transform", "translate(" + this.state.margin.yaxisMargin + ",25)")
-                .append("path")
+            let sunpath = svgDoc.select("g.sunpath")
+                .attr("transform", "translate(" + this.state.margin.yaxisMargin + ",25)");
+
+            let defsSunpath = sunpath.append("defs");
+            var filter = defsSunpath.append("filter")
+                .attr("id","glow");
+
+                filter.append("feGaussianBlur")
+		        .attr("class", "blur")
+		        .attr("stdDeviation","2")
+                .attr("result","coloredBlur");
+        
+            var feMerge = filter.append("feMerge");
+	            feMerge.append("feMergeNode")
+                .attr("in","coloredBlur");
+                
+	            feMerge.append("feMergeNode")
+		        .attr("in","SourceGraphic");
+
+                sunpath.append("path")
                 .datum(data)
                 .attr("class", "line")
                 .attr("d", assistsL)
                 .style("fill", "none")
                 .style("stroke", "white")
                 .style("stroke-width", "1.0px")
+                //.style("fill-opacity", 0)
+                .style("filter", "url(#glow)")
 
-            svgDoc.select("g.sunposition")
-            .attr("transform", "translate(" + this.state.margin.yaxisMargin + ",25)")
-                .append("circle")
-                .attr("r", 8.0)
+            var sunPosition = svgDoc.select("g.sunposition")
+            .attr("transform", "translate(" + this.state.margin.yaxisMargin + ",25)");
+
+            let defsSunPosition = sunPosition.append("defs");
+            
+            var radialGradient = defsSunPosition.append("radialGradient")
+                .attr("id","sunglow")
+                .attr("cx", "50%")
+                .attr("cy", "50%")
+                .attr("r", "75%")
+                ;
+
+            var stop1 = radialGradient.append("stop")
+                .attr("offset","0%")
+                .attr("style", "stop-color:rgb(255,255,255);stop-opacity:1")
+                ;
+
+            var stop2 = radialGradient.append("stop")
+                .attr("offset","17%")
+                .attr("style", "stop-color:rgb(255,255,255);stop-opacity:1")
+                ;
+            var stop3 = radialGradient.append("stop")
+                .attr("offset","100%")
+                .attr("style", "stop-color:rgb(0,0,0);stop-opacity:1")
+                ;
+
+
+            sunPosition.append("circle")
+                .attr("class", "sunpositionCircle")
+                .attr("r", 50.0)
                 .attr("cx", function(){ return xScale(time)})
                 .attr("cy", function(){ return yScale(timeY)})
-                .style("fill", "white")
+                //.style("fill", "white")
+                .style("fill", "url(#sunglow)")
                 .style("stroke", "white")
-                .style("stroke-width", "1px")
+                .style("stroke-width", "0px")
+                //.style("filter", "url(#sunglow)")
 
             svgDoc.select("g.sunpositionnight")
                 .attr("transform", "translate(" + this.state.margin.yaxisMargin + ",25)")
                     .append("circle")
+                    .attr("class", "sunpositionnightCircle")
                     .attr("r", 8.0)
                     .attr("cx", function(){ return xScale(time)})
                     .attr("cy", function(){ return yScale(timeY)})
@@ -193,8 +313,9 @@ export default class SunLineChart extends Component{
 
     render() {
         return(
-            <div ref={this.lineChartRef}>
-            <svg id="linechartsvg" width={this.state.width} >
+            <div className={styles.svgContainer} ref={this.lineChartRef}>
+            <svg id="linechartsvg" >
+            
                 <g className="x axis"></g>
 
                 <g className="y axis"></g>
@@ -205,7 +326,9 @@ export default class SunLineChart extends Component{
 
                 <g className="sunpositionnight"></g>
 
-                <g className="sunpath"></g>
+                <g className="sunpath">
+
+                </g>
 
                 
 

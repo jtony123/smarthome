@@ -13,7 +13,8 @@ class App extends Component {
         this.parentDivRef = React.createRef();
         this.state = { apiResponse: '',
                         apiTempReqTimer: null,
-                        elwidth: 0
+                        elwidth: 600, // default width
+                        windowSize: "",
                         };
     }
 
@@ -24,14 +25,31 @@ class App extends Component {
             .catch(err => err);
     }
 
+    handleResize = e => {
+        console.log("resizing");
+        const windowSize = window.innerWidth;
+        const elwidth = this.parentDivRef.current.clientWidth;
+        this.setState(prevState => {
+          return {
+            windowSize,
+            elwidth
+          };
+        });
+      };
+
     componentDidMount() {
       console.log("App componentDidMount");
 
-      const el = this.parentDivRef;
-      var elWidth = el.offsetWidth;
+      const windowSize = window.innerWidth;
+      window.addEventListener("resize", this.handleResize);
+
+      const elwidth = this.parentDivRef.current.clientWidth;
+
+      console.log(elwidth);
 
       this.setState({
-        elwidth: elWidth,
+        windowSize: windowSize,
+        elwidth: elwidth
       });
         this.callAPI();
         let apiTempReqTimer = setInterval(()=>{
@@ -43,7 +61,8 @@ class App extends Component {
     
     componentWillUnmount(){
         console.log("App componentWillUnmount");
-        clearInterval(this.state.apiTempReqTimer)
+        clearInterval(this.state.apiTempReqTimer);
+        window.removeEventListener("resize", this.handleResize);
     }
 
     render() {
@@ -53,9 +72,7 @@ class App extends Component {
         <div className={styles.dashboardRow}>
             <div className={styles.dashboardColumnLeft} ref={this.parentDivRef}>
                 <Clock/>
-                <SunLineChart 
-                    parentWidth={this.state.elwidth}
-                />
+                <SunLineChart/>
             </div>
             
             <div className={styles.dashboardColumnRight}>
