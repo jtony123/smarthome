@@ -42,7 +42,7 @@ export default class Clock extends Component {
 	
 	render() {
 		return(
-			<div id="clock" style={this.state.background} onClick={this.clicked}>
+			<div id="clock" className={styles.dashboardClockAlign} style={this.state.background} onClick={this.clicked}>
 				<h1 className={styles.dashboardClockFont}>{this.state.hour}<span className={styles.dashboardClockTick}>{this.state.colon}</span>{this.state.minute}</h1>
 			</div>
 		)

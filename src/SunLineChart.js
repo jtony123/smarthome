@@ -53,7 +53,9 @@ export default class SunLineChart extends Component{
             c2 : 0.881758,
             c1 : 1.09254,
             c : 0.210586,
-            data: data
+            data: data,
+            time: 0.0,
+            timeY: 0.0
         }
 
         this.xScale = d3.scaleLinear()
@@ -84,6 +86,9 @@ export default class SunLineChart extends Component{
         console.log("SunLineChart componentDidMount ");
 
         let timerInterval = setInterval(()=>{
+            var time = this.getTimeDecimal();
+            var timeY = this.getTimeY(time);
+            this.setState({ time: time, timeY: timeY });
             this.redrawChart();
         }, 5000);
 
@@ -92,7 +97,7 @@ export default class SunLineChart extends Component{
     }
 
     componentWillUnmount() {
-        //window.removeEventListener('resize');
+        clearInterval(this.state.timerInterval);
       }
 
 
@@ -104,12 +109,6 @@ export default class SunLineChart extends Component{
         var mins = d.getMinutes();
         var minhrs = mins/60;
         var time = hrs + minhrs;
-        //time = 20.0
-
-        // var timeY = (c4 * Math.pow(time,4)) 
-        //             - (c3 * Math.pow(time,3)) 
-        //             + (c2 * Math.pow(time,2)) 
-        //             - (c1*time) + c;
 
         return time;
       }
@@ -120,7 +119,6 @@ export default class SunLineChart extends Component{
         - (c3 * Math.pow(time,3)) 
         + (c2 * Math.pow(time,2)) 
         - (c1*time) + c;
-
         return timeY;
       }
 
@@ -129,24 +127,16 @@ export default class SunLineChart extends Component{
 
         console.log("redrawChart() called ");
 
-        var time = this.getTimeDecimal();
-        var timeY = this.getTimeY(time);
+        var time = this.state.time;
+        var timeY = this.state.timeY;
 
-        // var d = new Date();
-        // var hrs = d.getHours();
-        // var mins = d.getMinutes();
-        // var minhrs = mins/60;
-        // var time = hrs + minhrs;
-        // //time = 20.0
-
-        // var timeY = (c4 * Math.pow(time,4)) 
-        //             - (c3 * Math.pow(time,3)) 
-        //             + (c2 * Math.pow(time,2)) 
-        //             - (c1*time) + c;
-        
         let xScale = this.xScale;
         let yScale = this.yScale;
         var svgDoc = d3.select('svg#linechartsvg');
+
+        svgDoc.select("sunpositionGlow")
+        .attr("cx", function(){ return xScale(time)})
+        .attr("cy", function(){ return yScale(timeY)})
 
         svgDoc.select("sunpositionCircle")
             .attr("cx", function(){ return xScale(time)})
@@ -249,27 +239,45 @@ export default class SunLineChart extends Component{
                 .attr("id","sunglow")
                 .attr("cx", "50%")
                 .attr("cy", "50%")
-                .attr("r", "75%")
+                .attr("r", "40%")
                 ;
+
+            // var stop1 = radialGradient.append("stop")
+            //     .attr("offset","0%")
+            //     .attr("style", "stop-color:rgb(255,255,255);stop-opacity:1")
+            //     ;
+
+            // var stop2 = radialGradient.append("stop")
+            //     .attr("offset","5%")
+            //     .attr("style", "stop-color:rgb(255,255,255);stop-opacity:1")
+            //     ;
+
+            // var stop3 = radialGradient.append("stop")
+            //     .attr("offset","100%")
+            //     .attr("style", "stop-color:rgb(0,0,0);stop-opacity:1")
+            //     ;
 
             var stop1 = radialGradient.append("stop")
                 .attr("offset","0%")
-                .attr("style", "stop-color:rgb(255,255,255);stop-opacity:1")
+                .attr("style", "stop-color:rgb(255,0,0);stop-opacity:1")
                 ;
 
             var stop2 = radialGradient.append("stop")
-                .attr("offset","17%")
-                .attr("style", "stop-color:rgb(255,255,255);stop-opacity:1")
+                .attr("offset","5%")
+                .attr("style", "stop-color:rgb(255,255,0);stop-opacity:1")
                 ;
+
             var stop3 = radialGradient.append("stop")
                 .attr("offset","100%")
                 .attr("style", "stop-color:rgb(0,0,0);stop-opacity:1")
                 ;
+            
 
+           
 
             sunPosition.append("circle")
-                .attr("class", "sunpositionCircle")
-                .attr("r", 50.0)
+                .attr("class", "sunpositionGlow")
+                .attr("r", 100.0)
                 .attr("cx", function(){ return xScale(time)})
                 .attr("cy", function(){ return yScale(timeY)})
                 //.style("fill", "white")
@@ -277,6 +285,15 @@ export default class SunLineChart extends Component{
                 .style("stroke", "white")
                 .style("stroke-width", "0px")
                 //.style("filter", "url(#sunglow)")
+
+            sunPosition.append("circle")
+                .attr("class", "sunpositionCircle")
+                .attr("r", 8.0)
+                .attr("cx", function(){ return xScale(time)})
+                .attr("cy", function(){ return yScale(timeY)})
+                .style("fill", "white")
+                .style("stroke", "white")
+                .style("stroke-width", "2px")
 
             svgDoc.select("g.sunpositionnight")
                 .attr("transform", "translate(" + this.state.margin.yaxisMargin + ",25)")
@@ -312,6 +329,7 @@ export default class SunLineChart extends Component{
     }
 
     render() {
+        console.log("rendering");
         return(
             <div className={styles.svgContainer} ref={this.lineChartRef}>
             <svg id="linechartsvg" >

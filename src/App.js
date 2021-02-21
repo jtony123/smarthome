@@ -4,8 +4,11 @@ import 'fontsource-roboto';
 import React, { Component } from 'react';
 import Clock from './Clock';
 import SunLineChart from './SunLineChart';
+import StayAwake from 'stayawake.js';
 
 import styles from './dashboard.module.css';
+
+
 
 class App extends Component {
     constructor(props) {
@@ -15,7 +18,11 @@ class App extends Component {
                         apiTempReqTimer: null,
                         elwidth: 600, // default width
                         windowSize: "",
+                        isAwake : false
                         };
+
+        this.handleKeepAwake=this.handleKeepAwake.bind(this);
+
     }
 
     callAPI() {
@@ -23,6 +30,23 @@ class App extends Component {
             .then(res => res.text())
             .then(res => this.setState({ apiResponse: res }))
             .catch(err => err);
+    }
+
+    handleKeepAwake = e => {
+      e.preventDefault();
+      console.log("handleKeepAwake");
+      if(this.state.isAwake){
+        StayAwake.disable();
+      } else {
+        StayAwake.enable();
+      }
+
+      this.setState(state => ({
+        isAwake: !state.isAwake
+      }));
+
+      
+
     }
 
     handleResize = e => {
@@ -40,6 +64,8 @@ class App extends Component {
     componentDidMount() {
       console.log("App componentDidMount");
 
+      StayAwake.init();
+
       const windowSize = window.innerWidth;
       window.addEventListener("resize", this.handleResize);
 
@@ -55,7 +81,8 @@ class App extends Component {
         let apiTempReqTimer = setInterval(()=>{
                             this.callAPI();
                         },30000)
-        this.setState({ apiTempReqTimer: apiTempReqTimer })
+        this.setState({ apiTempReqTimer: apiTempReqTimer });
+
     }
     
     
@@ -63,13 +90,17 @@ class App extends Component {
         console.log("App componentWillUnmount");
         clearInterval(this.state.apiTempReqTimer);
         window.removeEventListener("resize", this.handleResize);
+        StayAwake.disable();
     }
 
     render() {
-        //console.log(this.state.apiResponse);
+      
         return (
         <div className={styles.dashboardBackground}>
         <div className={styles.dashboardRow}>
+        {/* <button onClick={this.handleKeepAwake}>
+              {this.state.isAwake ? 'AWAKE' : 'SLEEP'}
+            </button> */}
             <div className={styles.dashboardColumnLeft} ref={this.parentDivRef}>
                 <Clock/>
                 <SunLineChart/>
@@ -77,6 +108,11 @@ class App extends Component {
             
             <div className={styles.dashboardColumnRight}>
                 <p className = {styles.dashboardTempFont}>{this.state.apiResponse}&#176;</p>
+            </div>
+
+            <div>
+            
+
             </div>
           
           </div>
