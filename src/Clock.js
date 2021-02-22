@@ -1,12 +1,42 @@
-import logo from './logo.svg';
-//import './App.css';
 import React, { Component } from 'react';
 
 import moment from 'moment';
-import styles from './dashboard.module.css';
+
+import { withStyles } from "@material-ui/core/styles";
 
 
-export default class Clock extends Component {
+const styles = theme => ({
+    
+    dashboardClockAlign: {
+		//width: '60%',
+		textAlign: 'center',
+		backgroundColor: 'rgba(0 0 0 /0%)',
+		position: 'relative',
+		//top:0,
+		//left:0,
+		zIndex: 10,
+	},
+	dashboardClockTick: {
+		color: 'white',
+		fontWeight: 300,
+		animationName: 'ticking',
+		animationDuration: '1s',
+		animationIterationCount: 'infinite',
+
+
+	},
+	dashboardClockFont: {
+		color: 'white',
+		fontSize: '180px',
+		fontSize: '12.0em',
+		fontSize: '20vw',
+		fontWeight: 500,
+		margin: 0,
+		paddingLeft: '30px',
+	}
+  });
+
+class Clock extends Component {
 	
 	constructor() {
         super()
@@ -41,9 +71,10 @@ export default class Clock extends Component {
 	
 	
 	render() {
+		const { classes } = this.props;
 		return(
-			<div id="clock" className={styles.dashboardClockAlign} style={this.state.background} onClick={this.clicked}>
-				<h1 className={styles.dashboardClockFont}>{this.state.hour}<span className={styles.dashboardClockTick}>{this.state.colon}</span>{this.state.minute}</h1>
+			<div id="clock" className={classes.dashboardClockAlign} style={this.state.background} onClick={this.clicked}>
+				<h1 className={classes.dashboardClockFont}>{this.state.hour}<span className={classes.dashboardClockTick}>{this.state.colon}</span>{this.state.minute}</h1>
 			</div>
 		)
 	}
@@ -52,3 +83,4 @@ export default class Clock extends Component {
 	
 	
 }
+export default withStyles(styles, { withTheme: true })(Clock);

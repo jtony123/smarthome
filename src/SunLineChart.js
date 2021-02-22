@@ -1,7 +1,30 @@
 import React, { Component } from 'react';
 import * as d3 from 'd3';
+import Clock from './Clock';
 
-import styles from './dashboard.module.css';
+//import styles from './dashboard.module.css';
+import { withStyles } from "@material-ui/core/styles";
+
+const styles = theme => ({
+    
+    svgContainer: {
+        //display: 'inline-block',
+        //position: 'absolute',
+        //top: 0,
+        //left: 0,
+        //width: '100%',
+        //paddingBottom: '100%',
+        //verticalAlign: 'top',
+        //overflow: 'hidden',
+        marginTop: '-150px'
+    },
+    svgContent: {
+        display: 'inlineBlock',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+    }
+  });
 
 const c4 = 0.0014518;
 const c3 = 0.0696863;
@@ -37,7 +60,7 @@ const data = () => {
 }
 
 
-export default class SunLineChart extends Component{
+class SunLineChart extends Component{
 
     constructor(props) {
         super(props);
@@ -110,6 +133,7 @@ export default class SunLineChart extends Component{
         var minhrs = mins/60;
         var time = hrs + minhrs;
 
+        //return 12.0;
         return time;
       }
 
@@ -155,18 +179,6 @@ export default class SunLineChart extends Component{
         console.log("drawChart() called " + this.props.parentWidth);
         let data = this.state.data;
         
-        // var d = new Date();
-        // var hrs = d.getHours();
-        // var mins = d.getMinutes();
-        // var minhrs = mins/60;
-        // var time = hrs + minhrs;
-        // //time = 20.0
-
-        // var timeY = (c4 * Math.pow(time,4)) 
-        //             - (c3 * Math.pow(time,3)) 
-        //             + (c2 * Math.pow(time,2)) 
-        //             - (c1*time) + c;
-
         var time = this.getTimeDecimal();
         var timeY = this.getTimeY(time);
 
@@ -330,8 +342,12 @@ export default class SunLineChart extends Component{
 
     render() {
         console.log("rendering");
+
+        const { classes } = this.props;
+
         return(
-            <div className={styles.svgContainer} ref={this.lineChartRef}>
+            <div className={classes.svgContainer} ref={this.lineChartRef}>
+                
             <svg id="linechartsvg" >
             
                 <g className="x axis"></g>
@@ -359,3 +375,5 @@ export default class SunLineChart extends Component{
 
 
 }
+
+export default withStyles(styles, { withTheme: true })(SunLineChart);

@@ -1,16 +1,68 @@
-import logo from './logo.svg';
 import 'fontsource-roboto';
-//import './App.css';
 import React, { Component } from 'react';
 import Clock from './Clock';
 import SunLineChart from './SunLineChart';
 import StayAwake from 'stayawake.js';
 
-import styles from './dashboard.module.css';
+//import styles from './dashboard.module.css';
 
+import { withStyles } from "@material-ui/core/styles";
+import Paper from '@material-ui/core/Paper';
+import Grid from '@material-ui/core/Grid';
+import Chip from '@material-ui/core/Chip';
+import Avatar from '@material-ui/core/Avatar';
+
+
+const styles = theme => ({
+  root: {
+    flexGrow: 1,
+  },
+  paper: {
+    //padding: theme.spacing(2),
+    //textAlign: 'center',
+    //color: 'black',
+  },
+  dashboard: {
+    backgroundColor: 'black',
+
+
+  },
+  svgContainer: {
+    //display: 'inline-block',
+    //position: 'absolute',
+    //top: 0,
+    //left: 0,
+    //width: '100%',
+    //paddingBottom: '100%',
+    //verticalAlign: 'top',
+    //overflow: 'hidden',
+},
+svgContent: {
+    display: 'inlineBlock',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+},
+dashboardTempFont: {
+	color: 'white',
+	fontSize: '4.0em',
+	textAlign: 'center',
+	margin: 0,
+	paddingTop: '25px',
+	
+},
+chip: {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  tempSymbol:'&#176;'
+
+}
+});
 
 
 class App extends Component {
+
     constructor(props) {
         super(props);
         this.parentDivRef = React.createRef();
@@ -22,8 +74,12 @@ class App extends Component {
                         };
 
         this.handleKeepAwake=this.handleKeepAwake.bind(this);
+        this.handleClick=this.handleClick.bind(this);
 
+        
     }
+
+    
 
     callAPI() {
         fetch("http://192.168.0.30:8080")
@@ -52,13 +108,18 @@ class App extends Component {
     handleResize = e => {
         console.log("resizing");
         const windowSize = window.innerWidth;
-        const elwidth = this.parentDivRef.current.clientWidth;
+        //const elwidth = this.parentDivRef.current.clientWidth;
         this.setState(prevState => {
           return {
             windowSize,
-            elwidth
+            //elwidth
           };
         });
+      };
+
+      handleClick = e => {
+        console.log("clicking");
+        
       };
 
     componentDidMount() {
@@ -69,13 +130,13 @@ class App extends Component {
       const windowSize = window.innerWidth;
       window.addEventListener("resize", this.handleResize);
 
-      const elwidth = this.parentDivRef.current.clientWidth;
+      //const elwidth = this.parentDivRef.current.clientWidth;
 
-      console.log(elwidth);
+      //console.log(elwidth);
 
       this.setState({
         windowSize: windowSize,
-        elwidth: elwidth
+        //elwidth: elwidth
       });
         this.callAPI();
         let apiTempReqTimer = setInterval(()=>{
@@ -94,32 +155,38 @@ class App extends Component {
     }
 
     render() {
+
+      const { classes } = this.props;
+
+      var s1 = this.state.apiResponse;
+      var s2 = String.fromCharCode(176);
+
+      const bufferTemp = s1.concat(s2);
       
         return (
-        <div className={styles.dashboardBackground}>
-        <div className={styles.dashboardRow}>
-        {/* <button onClick={this.handleKeepAwake}>
-              {this.state.isAwake ? 'AWAKE' : 'SLEEP'}
-            </button> */}
-            <div className={styles.dashboardColumnLeft} ref={this.parentDivRef}>
+
+
+          <div className={classes.root}>
+      <Grid className={classes.dashboard} container spacing={2}>
+        <Grid item xs={12} sm={8}>
+        <Grid item xs={12}>
+            <Clock/>
             <SunLineChart/>
-                <Clock/>
-                
-            </div>
-            
-            <div className={styles.dashboardColumnRight}>
-                <p className = {styles.dashboardTempFont}>{this.state.apiResponse}&#176;</p>
-            </div>
+        </Grid>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <Chip className={classes.chip} size="medium" avatar={<Avatar>Buffer</Avatar>} label={bufferTemp} onClick={this.handleClick} />
+        <p className = {classes.dashboardTempFont}>{this.state.apiResponse}&#176;</p>
+        </Grid>
+        <Grid item xs={12}>
+          <Paper className={classes.paper}>Lots more to come</Paper>
+        </Grid>
+      </Grid>
+    </div>
 
-            <div>
-            
 
-            </div>
-          
-          </div>
-        </div>
         );
     }
 }
 
-export default App;
+export default withStyles(styles, { withTheme: true })(App);
