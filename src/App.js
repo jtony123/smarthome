@@ -102,8 +102,9 @@ class App extends Component {
               {this.state.isAwake ? 'AWAKE' : 'SLEEP'}
             </button> */}
             <div className={styles.dashboardColumnLeft} ref={this.parentDivRef}>
+            <SunLineChart/>
                 <Clock/>
-                <SunLineChart/>
+                
             </div>
             
             <div className={styles.dashboardColumnRight}>

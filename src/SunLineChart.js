@@ -91,7 +91,7 @@ export default class SunLineChart extends Component{
             this.setState({ time: time, timeY: timeY });
             this.redrawChart();
         }, 5000);
-
+        this.setState({ timerInterval: timerInterval });
         this.drawChart();
 
     }
@@ -202,7 +202,7 @@ export default class SunLineChart extends Component{
             .y(function (d) { return yScale(d.y); });
 
             let sunpath = svgDoc.select("g.sunpath")
-                .attr("transform", "translate(" + this.state.margin.yaxisMargin + ",25)");
+                .attr("transform", "translate(" + this.state.margin.yaxisMargin + ",200)");
 
             let defsSunpath = sunpath.append("defs");
             var filter = defsSunpath.append("filter")
@@ -231,7 +231,7 @@ export default class SunLineChart extends Component{
                 .style("filter", "url(#glow)")
 
             var sunPosition = svgDoc.select("g.sunposition")
-            .attr("transform", "translate(" + this.state.margin.yaxisMargin + ",25)");
+            .attr("transform", "translate(" + this.state.margin.yaxisMargin + ",200)");
 
             let defsSunPosition = sunPosition.append("defs");
             
@@ -296,7 +296,7 @@ export default class SunLineChart extends Component{
                 .style("stroke-width", "2px")
 
             svgDoc.select("g.sunpositionnight")
-                .attr("transform", "translate(" + this.state.margin.yaxisMargin + ",25)")
+                .attr("transform", "translate(" + this.state.margin.yaxisMargin + ",200)")
                     .append("circle")
                     .attr("class", "sunpositionnightCircle")
                     .attr("r", 8.0)
@@ -307,7 +307,7 @@ export default class SunLineChart extends Component{
                     .style("stroke-width", "3px")
 
             svgDoc.select("g.sunriseset")
-            .attr("transform", "translate(" + this.state.margin.yaxisMargin + ",25)")
+            .attr("transform", "translate(" + this.state.margin.yaxisMargin + ",200)")
             .append("line")
             .attr("x1", function(){ return xScale(0)})
             .attr("y1", function(){ return yScale(8)})
@@ -317,7 +317,7 @@ export default class SunLineChart extends Component{
             .style("stroke-width", "1px")
 
             svgDoc.select("g.nightblock")
-            .attr("transform", "translate(" + this.state.margin.yaxisMargin + ",25)")
+            .attr("transform", "translate(" + this.state.margin.yaxisMargin + ",200)")
             .append("rect")
             .attr("x", function(){ return xScale(0)})
             .attr("y", function(){ return yScale(8)})

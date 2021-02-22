@@ -1,3 +1,5 @@
+
+
 .dashboard {
 	color: white;
 	background-color: black;
@@ -46,6 +48,7 @@
 	float: left;
 	width: 65vw;
 	height: 100vh;
+	position: relative;
 }
 
 .dashboardColumnRight {
@@ -57,6 +60,11 @@
 
 .dashboardClockAlign {
 	text-align: center;
+	background-color: rgba(0 0 0 /0%);
+	position:absolute;
+	top:0;
+	width:100%;
+	z-index: 10;
 }
 
 .dashboardClockTick {
@@ -83,7 +91,9 @@
 
 .svgContainer {
 	display: inline-block;
-    position: relative;
+	position: absolute;
+	top: 0;
+	left: 0;
     width: 100%;
     padding-bottom: 100%;
     vertical-align: top;
