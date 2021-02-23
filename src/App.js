@@ -2,15 +2,13 @@ import 'fontsource-roboto';
 import React, { Component } from 'react';
 import Clock from './Clock';
 import SunLineChart from './SunLineChart';
-import StayAwake from 'stayawake.js';
-
-//import styles from './dashboard.module.css';
-
 import { withStyles } from "@material-ui/core/styles";
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import Chip from '@material-ui/core/Chip';
 import Avatar from '@material-ui/core/Avatar';
+
+import ReactPlayer from 'react-player/lazy'
 
 
 const styles = theme => ({
@@ -60,6 +58,13 @@ chip: {
 }
 });
 
+// function Component() {
+//   const { isSupported, released, request, release } = useWakeLock({
+//     onRequest: () => alert('Screen Wake Lock: requested!'),
+//     onError: () => alert('An error happened 💥'),
+//     onRelease: () => alert('Screen Wake Lock: released!'),
+//   });
+
 
 class App extends Component {
 
@@ -91,11 +96,11 @@ class App extends Component {
     handleKeepAwake = e => {
       e.preventDefault();
       console.log("handleKeepAwake");
-      if(this.state.isAwake){
-        StayAwake.disable();
-      } else {
-        StayAwake.enable();
-      }
+      // if(this.state.isAwake){
+      //   StayAwake.disable();
+      // } else {
+      //   StayAwake.enable();
+      // }
 
       this.setState(state => ({
         isAwake: !state.isAwake
@@ -123,9 +128,14 @@ class App extends Component {
       };
 
     componentDidMount() {
-      console.log("App componentDidMount");
+      if ('wakeLock' in navigator) {
+        //isSupported = true;
+        console.log('Screen Wake Lock API supported!');
+      } else {
+        console.log('Wake lock is not supported by this browser.');
+      }
+      console.log("App componentDidMount here");
 
-      StayAwake.init();
 
       const windowSize = window.innerWidth;
       window.addEventListener("resize", this.handleResize);
@@ -138,11 +148,16 @@ class App extends Component {
         windowSize: windowSize,
         //elwidth: elwidth
       });
-        this.callAPI();
-        let apiTempReqTimer = setInterval(()=>{
-                            this.callAPI();
-                        },30000)
-        this.setState({ apiTempReqTimer: apiTempReqTimer });
+
+      this.callAPI();
+      let apiTempReqTimer = setInterval(()=>{
+                          this.callAPI();
+                      },30000)
+      
+      this.setState({ apiTempReqTimer: apiTempReqTimer });
+
+      console.log("here");
+      
 
     }
     
@@ -151,12 +166,14 @@ class App extends Component {
         console.log("App componentWillUnmount");
         clearInterval(this.state.apiTempReqTimer);
         window.removeEventListener("resize", this.handleResize);
-        StayAwake.disable();
+        //StayAwake.disable();
     }
 
     render() {
 
       const { classes } = this.props;
+
+      
 
       var s1 = this.state.apiResponse;
       var s2 = String.fromCharCode(176);
@@ -180,8 +197,11 @@ class App extends Component {
         </Grid>
         <Grid item xs={12}>
           <Paper className={classes.paper}>Lots more to come</Paper>
+          
         </Grid>
       </Grid>
+      <ReactPlayer url="../videos/mov_bbb.mp4" width='100%' playing={true} loop={true} volume={0} playsinline={true}/>
+      
     </div>
 
 

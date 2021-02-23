@@ -1,21 +1,11 @@
 import React, { Component } from 'react';
 import * as d3 from 'd3';
-import Clock from './Clock';
 
-//import styles from './dashboard.module.css';
 import { withStyles } from "@material-ui/core/styles";
 
 const styles = theme => ({
     
     svgContainer: {
-        //display: 'inline-block',
-        //position: 'absolute',
-        //top: 0,
-        //left: 0,
-        //width: '100%',
-        //paddingBottom: '100%',
-        //verticalAlign: 'top',
-        //overflow: 'hidden',
         marginTop: '-150px'
     },
     svgContent: {
@@ -65,7 +55,6 @@ class SunLineChart extends Component{
     constructor(props) {
         super(props);
         this.lineChartRef = React.createRef();
-        console.log(this.props.parentWidth);
         this.state = {
             height: 300,
             width: 600,
@@ -99,6 +88,7 @@ class SunLineChart extends Component{
 
         this.getTimeDecimal = this.getTimeDecimal.bind(this);
         this.getTimeY = this.getTimeY.bind(this);
+        this.getTimeFactor = this.getTimeFactor.bind(this);
     }
 
     lineChartRef = React.createRef();
@@ -106,7 +96,6 @@ class SunLineChart extends Component{
    
 
     componentDidMount() {
-        console.log("SunLineChart componentDidMount ");
 
         let timerInterval = setInterval(()=>{
             var time = this.getTimeDecimal();
@@ -133,7 +122,7 @@ class SunLineChart extends Component{
         var minhrs = mins/60;
         var time = hrs + minhrs;
 
-        //return 12.0;
+        //return 19.5;
         return time;
       }
 
@@ -146,10 +135,23 @@ class SunLineChart extends Component{
         return timeY;
       }
 
+      getTimeFactor(time){
+
+        var factor = 0.0;
+        if(time < 13){
+            var max = Math.max(0.0, (time - 8));
+            factor = max;
+        } else {
+            var max = Math.max(0.0, ((time * -1) + 19));
+            factor = max;
+        }
+        return factor * 51;
+      }
+
 
     redrawChart() {
 
-        console.log("redrawChart() called ");
+        //console.log("redrawChart() called ");
 
         var time = this.state.time;
         var timeY = this.state.timeY;
@@ -170,13 +172,22 @@ class SunLineChart extends Component{
                 .attr("cx", function(){ return xScale(time)})
                 .attr("cy", function(){ return yScale(timeY)})
 
+        var factor = this.getTimeFactor(time);
 
+        svgDoc.select("#stop1")
+            .attr("style", "stop-color:rgb(255," + (factor) +","+ (factor) +");stop-opacity:1")
+
+        svgDoc.select("#stop2")
+            .attr("style", "stop-color:rgb(255,255,"+ (factor) +");stop-opacity:1")
+
+        svgDoc.select("#stop3")
+            .attr("style", "stop-color:rgb(0,0,0);stop-opacity:1")
     }
 
 
     drawChart() {
 
-        console.log("drawChart() called " + this.props.parentWidth);
+        console.log("drawChart() called ");
         let data = this.state.data;
         
         var time = this.getTimeDecimal();
@@ -186,7 +197,7 @@ class SunLineChart extends Component{
         let yScale = this.yScale;
         let xAxis = this.xAxis.scale(xScale);
         let yAxis = this.yAxis;
-        var height = this.state.height;// - this.state.margin.top - this.state.margin.bottom;
+        var height = this.state.height;
 
         let st = styles.svgContent;
         var svgDoc = d3.select('svg#linechartsvg')
@@ -239,7 +250,6 @@ class SunLineChart extends Component{
                 .style("fill", "none")
                 .style("stroke", "white")
                 .style("stroke-width", "1.0px")
-                //.style("fill-opacity", 0)
                 .style("filter", "url(#glow)")
 
             var sunPosition = svgDoc.select("g.sunposition")
@@ -254,35 +264,40 @@ class SunLineChart extends Component{
                 .attr("r", "40%")
                 ;
 
+            var factor = this.getTimeFactor(time);
+
+            radialGradient.append("stop")
+                .attr("id", "stop1")
+                .attr("offset","0%")
+                .attr("style", "stop-color:rgb(255," + (factor) +","+ (factor) +");stop-opacity:1")
+                ;
+
+            radialGradient.append("stop")
+            .attr("id", "stop2")
+                .attr("offset","5%")
+                .attr("style", "stop-color:rgb(255,255,"+ (factor) +");stop-opacity:1")
+                ;
+
+            radialGradient.append("stop")
+            .attr("id", "stop3")
+                .attr("offset","100%")
+                .attr("style", "stop-color:rgb(0,0,0);stop-opacity:1")
+                ;
+
             // var stop1 = radialGradient.append("stop")
             //     .attr("offset","0%")
-            //     .attr("style", "stop-color:rgb(255,255,255);stop-opacity:1")
+            //     .attr("style", "stop-color:rgb(255,0,0);stop-opacity:1")
             //     ;
 
             // var stop2 = radialGradient.append("stop")
             //     .attr("offset","5%")
-            //     .attr("style", "stop-color:rgb(255,255,255);stop-opacity:1")
+            //     .attr("style", "stop-color:rgb(255,255,0);stop-opacity:1")
             //     ;
 
             // var stop3 = radialGradient.append("stop")
             //     .attr("offset","100%")
             //     .attr("style", "stop-color:rgb(0,0,0);stop-opacity:1")
             //     ;
-
-            var stop1 = radialGradient.append("stop")
-                .attr("offset","0%")
-                .attr("style", "stop-color:rgb(255,0,0);stop-opacity:1")
-                ;
-
-            var stop2 = radialGradient.append("stop")
-                .attr("offset","5%")
-                .attr("style", "stop-color:rgb(255,255,0);stop-opacity:1")
-                ;
-
-            var stop3 = radialGradient.append("stop")
-                .attr("offset","100%")
-                .attr("style", "stop-color:rgb(0,0,0);stop-opacity:1")
-                ;
             
 
            

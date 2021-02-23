@@ -8,22 +8,17 @@ import { withStyles } from "@material-ui/core/styles";
 const styles = theme => ({
     
     dashboardClockAlign: {
-		//width: '60%',
 		textAlign: 'center',
 		backgroundColor: 'rgba(0 0 0 /0%)',
 		position: 'relative',
-		//top:0,
-		//left:0,
 		zIndex: 10,
 	},
 	dashboardClockTick: {
 		color: 'white',
 		fontWeight: 300,
-		animationName: 'ticking',
+		animationName: '$ticking',
 		animationDuration: '1s',
 		animationIterationCount: 'infinite',
-
-
 	},
 	dashboardClockFont: {
 		color: 'white',
@@ -33,6 +28,11 @@ const styles = theme => ({
 		fontWeight: 500,
 		margin: 0,
 		paddingLeft: '30px',
+	},
+
+	"@keyframes ticking": {
+		from: {opacity:'0.8'},
+		to: {opacity:'0.5'}
 	}
   });
 
@@ -41,19 +41,16 @@ class Clock extends Component {
 	constructor() {
         super()
         this.state = {
-			//time: moment().format('hh') + '.' + moment().format('mm'),
 			hour: moment().format('hh'),
 			colon: ':',
 			minute: moment().format('mm'),
 			timerInterval: null
 			}
-			//this.clicked = this.clicked.bind(this)
     }
     
     	componentDidMount() {
 		let timerInterval = setInterval(()=>{
 				this.setState({
-					//time: moment().format('hh') + '.' + moment().format('mm'),
 					hour: moment().format('hh'),
 					colon: ':',
 					minute: moment().format('mm')
