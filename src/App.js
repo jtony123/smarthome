@@ -22,18 +22,8 @@ const styles = theme => ({
   },
   dashboard: {
     backgroundColor: 'black',
-
-
   },
   svgContainer: {
-    //display: 'inline-block',
-    //position: 'absolute',
-    //top: 0,
-    //left: 0,
-    //width: '100%',
-    //paddingBottom: '100%',
-    //verticalAlign: 'top',
-    //overflow: 'hidden',
 },
 svgContent: {
     display: 'inlineBlock',
@@ -58,12 +48,6 @@ chip: {
 }
 });
 
-// function Component() {
-//   const { isSupported, released, request, release } = useWakeLock({
-//     onRequest: () => alert('Screen Wake Lock: requested!'),
-//     onError: () => alert('An error happened 💥'),
-//     onRelease: () => alert('Screen Wake Lock: released!'),
-//   });
 
 
 class App extends Component {
@@ -75,10 +59,8 @@ class App extends Component {
                         apiTempReqTimer: null,
                         elwidth: 600, // default width
                         windowSize: "",
-                        isAwake : false
                         };
 
-        this.handleKeepAwake=this.handleKeepAwake.bind(this);
         this.handleClick=this.handleClick.bind(this);
 
         
@@ -93,22 +75,24 @@ class App extends Component {
             .catch(err => err);
     }
 
-    handleKeepAwake = e => {
-      e.preventDefault();
-      console.log("handleKeepAwake");
-      // if(this.state.isAwake){
-      //   StayAwake.disable();
-      // } else {
-      //   StayAwake.enable();
-      // }
+    getWeather() {
 
-      this.setState(state => ({
-        isAwake: !state.isAwake
-      }));
+      const headers = new Headers({
+        "Content-Type": "application/json"
+    })
 
-      
-
+      const options = {
+        method: "GET",
+        mode: "cors",
+        headers: headers
     }
+    
+      fetch("http://192.168.0.30:8090/weather", options)
+          .then(res => res.text())
+          .then(res => console.log(res))
+          .catch(err => err);
+  }
+
 
     handleResize = e => {
         console.log("resizing");
@@ -149,6 +133,8 @@ class App extends Component {
         //elwidth: elwidth
       });
 
+      this.getWeather();
+
       this.callAPI();
       let apiTempReqTimer = setInterval(()=>{
                           this.callAPI();
@@ -156,7 +142,6 @@ class App extends Component {
       
       this.setState({ apiTempReqTimer: apiTempReqTimer });
 
-      console.log("here");
       
 
     }
@@ -166,14 +151,11 @@ class App extends Component {
         console.log("App componentWillUnmount");
         clearInterval(this.state.apiTempReqTimer);
         window.removeEventListener("resize", this.handleResize);
-        //StayAwake.disable();
     }
 
     render() {
 
       const { classes } = this.props;
-
-      
 
       var s1 = this.state.apiResponse;
       var s2 = String.fromCharCode(176);

@@ -26,22 +26,17 @@ const c = 0.210586;
 const data = () => {
 
     var data = [];
-    
     var obj = {};
     obj.x = 0;
     obj.y = 0;
     data.push(obj);
 
       for(var i =1; i<=24; i++){
-
         var obj = {};
         obj.x = i;
-
         var i4 = Math.pow(i,4);
         var i3 = Math.pow(i,3);
         var i2 = Math.pow(i,2);
-
-
         obj.y = (c4*i4) - (c3*i3) + (c2*i2) - (c1*i) + c;
         data.push(obj);
       }

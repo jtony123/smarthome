@@ -22,9 +22,9 @@ const styles = theme => ({
 	},
 	dashboardClockFont: {
 		color: 'white',
-		fontSize: '180px',
-		fontSize: '12.0em',
-		fontSize: '20vw',
+		fontSize: '160px',
+		//fontSize: '12.0em',
+		//fontSize: '20vw',
 		fontWeight: 500,
 		margin: 0,
 		paddingLeft: '30px',
