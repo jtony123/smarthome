@@ -8,7 +8,10 @@ import Grid from '@material-ui/core/Grid';
 import Chip from '@material-ui/core/Chip';
 import Avatar from '@material-ui/core/Avatar';
 
-import ReactPlayer from 'react-player/lazy'
+import ReactPlayer from 'react-player/lazy';
+import * as Scroll from 'react-scroll';
+import { Link, Element, Events, animateScroll as scroll, scrollSpy, scroller } from 'react-scroll'
+ 
 
 
 const styles = theme => ({
@@ -22,6 +25,7 @@ const styles = theme => ({
   },
   dashboard: {
     backgroundColor: 'black',
+    marginBottom: '200px'
   },
   svgContainer: {
 },
@@ -57,37 +61,28 @@ class App extends Component {
         this.parentDivRef = React.createRef();
         this.state = { apiResponse: '',
                         apiTempReqTimer: null,
+                        apiWeatherReqTimer: null,
                         elwidth: 600, // default width
                         windowSize: "",
                         };
 
         this.handleClick=this.handleClick.bind(this);
 
-        
     }
 
     
 
     callAPI() {
-        fetch("http://192.168.0.30:8080")
-            .then(res => res.text())
-            .then(res => this.setState({ apiResponse: res }))
-            .catch(err => err);
+
+      fetch("http://192.168.0.30:8090")
+          .then(res => res.text())
+          .then(res => this.setState({ apiResponse: res }))
+          .catch(err => err);
     }
 
     getWeather() {
 
-      const headers = new Headers({
-        "Content-Type": "application/json"
-    })
-
-      const options = {
-        method: "GET",
-        mode: "cors",
-        headers: headers
-    }
-    
-      fetch("http://192.168.0.30:8090/weather", options)
+      fetch("http://192.168.0.30:8090/weather")
           .then(res => res.text())
           .then(res => console.log(res))
           .catch(err => err);
@@ -97,11 +92,9 @@ class App extends Component {
     handleResize = e => {
         console.log("resizing");
         const windowSize = window.innerWidth;
-        //const elwidth = this.parentDivRef.current.clientWidth;
         this.setState(prevState => {
           return {
-            windowSize,
-            //elwidth
+            windowSize
           };
         });
       };
@@ -112,45 +105,47 @@ class App extends Component {
       };
 
     componentDidMount() {
-      if ('wakeLock' in navigator) {
-        //isSupported = true;
-        console.log('Screen Wake Lock API supported!');
-      } else {
-        console.log('Wake lock is not supported by this browser.');
-      }
-      console.log("App componentDidMount here");
-
 
       const windowSize = window.innerWidth;
       window.addEventListener("resize", this.handleResize);
-
-      //const elwidth = this.parentDivRef.current.clientWidth;
-
-      //console.log(elwidth);
 
       this.setState({
         windowSize: windowSize,
         //elwidth: elwidth
       });
 
-      this.getWeather();
-
       this.callAPI();
       let apiTempReqTimer = setInterval(()=>{
                           this.callAPI();
                       },30000)
-      
-      this.setState({ apiTempReqTimer: apiTempReqTimer });
 
+      let apiWeatherReqTimer = setInterval(()=>{
+                        this.callAPI();
+                    },3600000)
       
+      this.setState({ apiTempReqTimer: apiTempReqTimer,
+        apiWeatherReqTimer: apiWeatherReqTimer
+                    });
 
+      Events.scrollEvent.register('begin', function(to, element) {
+        console.log('begin', arguments);
+      });
+
+      Events.scrollEvent.register('end', function(to, element) {
+        console.log('end', arguments);
+      });
+
+      scrollSpy.update();
     }
     
     
     componentWillUnmount(){
-        console.log("App componentWillUnmount");
-        clearInterval(this.state.apiTempReqTimer);
-        window.removeEventListener("resize", this.handleResize);
+      console.log("App componentWillUnmount");
+      clearInterval(this.state.apiTempReqTimer);
+      clearInterval(this.state.apiWeatherReqTimer);
+      window.removeEventListener("resize", this.handleResize);
+      Events.scrollEvent.remove('begin');
+      Events.scrollEvent.remove('end');
     }
 
     render() {
@@ -174,8 +169,7 @@ class App extends Component {
         </Grid>
         </Grid>
         <Grid item xs={12} sm={4}>
-          <Chip className={classes.chip} size="medium" avatar={<Avatar>Buffer</Avatar>} label={bufferTemp} onClick={this.handleClick} />
-        <p className = {classes.dashboardTempFont}>{this.state.apiResponse}&#176;</p>
+          <p className = {classes.dashboardTempFont}>{this.state.apiResponse}&#176;</p>
         </Grid>
         <Grid item xs={12}>
           <Paper className={classes.paper}>Lots more to come</Paper>

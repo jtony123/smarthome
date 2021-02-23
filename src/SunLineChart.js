@@ -6,7 +6,7 @@ import { withStyles } from "@material-ui/core/styles";
 const styles = theme => ({
     
     svgContainer: {
-        marginTop: '-150px'
+        marginTop: '-200px'
     },
     svgContent: {
         display: 'inlineBlock',
@@ -16,28 +16,49 @@ const styles = theme => ({
     }
   });
 
-const c4 = 0.0014518;
-const c3 = 0.0696863;
-const c2 = 0.881758;
-const c1 = 1.09254;
-const c = 0.210586;
+// const c4 = 0.0014518;
+// const c3 = 0.0696863;
+// const c2 = 0.881758;
+// const c1 = 1.09254;
+// const c = 0.210586;
+
+// const c4 = 0.000277249;
+// const c3 = 0.014417;
+// const c2 = 0.203168;
+// const c1 = 0.409441;
+// const c = 0.773985;
+
+
+const c4 = 0.000372911;
+const c3 = 0.0193914;
+const c2 = 0.272268;
+const c1 = 0.524676;
+const c = 0.788775;
+
 
 
 const data = () => {
 
-    var data = [];
-    var obj = {};
-    obj.x = 0;
-    obj.y = 0;
-    data.push(obj);
+    var d = new Date();
+        var hrs = d.getHours();
+        var mins = d.getMinutes();
+        var minhrs = mins/60;
+        var time = hrs + minhrs;
 
-      for(var i =1; i<=24; i++){
+    var data = [];
+    // var obj = {};
+    // obj.x = 0;
+    // obj.y = 0;
+    // data.push(obj);
+
+      for(var i = (time - 1); i<(time + 24); i++){
         var obj = {};
         obj.x = i;
-        var i4 = Math.pow(i,4);
-        var i3 = Math.pow(i,3);
-        var i2 = Math.pow(i,2);
-        obj.y = (c4*i4) - (c3*i3) + (c2*i2) - (c1*i) + c;
+        var modi = i % 24;
+        var i4 = Math.pow(modi,4);
+        var i3 = Math.pow(modi,3);
+        var i2 = Math.pow(modi,2);
+        obj.y = (c4*i4) - (c3*i3) + (c2*i2) - (c1*(i%24)) + c;
         data.push(obj);
       }
 
@@ -53,25 +74,28 @@ class SunLineChart extends Component{
         this.state = {
             height: 300,
             width: 600,
-            margin: { top: 50, right: 0, bottom: 5, left: 0, between: 20, yaxisMargin: 0 },
+            margin: { top: 50, right: 0, bottom: 5, left: 0, between: 20, yaxisMargin: 25 },
             timerInterval: null,
-            c4 : 0.0014518,
-            c3 : 0.0696863,
-            c2 : 0.881758,
-            c1 : 1.09254,
-            c : 0.210586,
+            
+            
             data: data,
             time: 0.0,
             timeY: 0.0
         }
 
+        var d = new Date();
+        var hrs = d.getHours();
+        var mins = d.getMinutes();
+        var minhrs = mins/60;
+        var time = hrs + minhrs;
+
         this.xScale = d3.scaleLinear()
             .range([0, this.state.width])
-            .domain([0, 24]);
+            .domain([time, (time + 24)]);
         
         this.yScale = d3.scaleLinear()
-            .range([(this.state.height - (this.state.margin.top + this.state.margin.bottom)), 0])
-            .domain([0, 24]);
+            .range([(this.state.height), 0])
+            .domain([0, 12]);
 
 
         this.xAxis = d3.axisBottom();
@@ -117,7 +141,7 @@ class SunLineChart extends Component{
         var minhrs = mins/60;
         var time = hrs + minhrs;
 
-        //return 19.5;
+        //return 13;
         return time;
       }
 
@@ -198,7 +222,7 @@ class SunLineChart extends Component{
         var svgDoc = d3.select('svg#linechartsvg')
             //.attr("height", this.state.height)
             .attr("preserveAspectRatio", "xMinYMin meet")
-            .attr("viewBox", "0 0 600 600")
+            .attr("viewBox", "0 0 600 500")
             .classed(st, true);
             ;
 
@@ -220,7 +244,7 @@ class SunLineChart extends Component{
             .y(function (d) { return yScale(d.y); });
 
             let sunpath = svgDoc.select("g.sunpath")
-                .attr("transform", "translate(" + this.state.margin.yaxisMargin + ",200)");
+                .attr("transform", "translate(" + this.state.margin.yaxisMargin + "," + this.state.margin.top + ")");
 
             let defsSunpath = sunpath.append("defs");
             var filter = defsSunpath.append("filter")
@@ -248,7 +272,7 @@ class SunLineChart extends Component{
                 .style("filter", "url(#glow)")
 
             var sunPosition = svgDoc.select("g.sunposition")
-            .attr("transform", "translate(" + this.state.margin.yaxisMargin + ",200)");
+            .attr("transform", "translate(" + this.state.margin.yaxisMargin + "," + this.state.margin.top + ")");
 
             let defsSunPosition = sunPosition.append("defs");
             
@@ -279,23 +303,6 @@ class SunLineChart extends Component{
                 .attr("style", "stop-color:rgb(0,0,0);stop-opacity:1")
                 ;
 
-            // var stop1 = radialGradient.append("stop")
-            //     .attr("offset","0%")
-            //     .attr("style", "stop-color:rgb(255,0,0);stop-opacity:1")
-            //     ;
-
-            // var stop2 = radialGradient.append("stop")
-            //     .attr("offset","5%")
-            //     .attr("style", "stop-color:rgb(255,255,0);stop-opacity:1")
-            //     ;
-
-            // var stop3 = radialGradient.append("stop")
-            //     .attr("offset","100%")
-            //     .attr("style", "stop-color:rgb(0,0,0);stop-opacity:1")
-            //     ;
-            
-
-           
 
             sunPosition.append("circle")
                 .attr("class", "sunpositionGlow")
@@ -318,7 +325,7 @@ class SunLineChart extends Component{
                 .style("stroke-width", "2px")
 
             svgDoc.select("g.sunpositionnight")
-                .attr("transform", "translate(" + this.state.margin.yaxisMargin + ",200)")
+                .attr("transform", "translate(" + this.state.margin.yaxisMargin + "," + this.state.margin.top + ")")
                     .append("circle")
                     .attr("class", "sunpositionnightCircle")
                     .attr("r", 8.0)
@@ -329,22 +336,24 @@ class SunLineChart extends Component{
                     .style("stroke-width", "3px")
 
             svgDoc.select("g.sunriseset")
-            .attr("transform", "translate(" + this.state.margin.yaxisMargin + ",200)")
+            .attr("transform", "translate(" + this.state.margin.yaxisMargin + "," + this.state.margin.top + ")")
             .append("line")
-            .attr("x1", function(){ return xScale(0)})
-            .attr("y1", function(){ return yScale(8)})
-            .attr("x2", function(){ return xScale(24)})
-            .attr("y2", function(){ return yScale(8)})
+            .datum(data)
+            .attr("x1", function(data){ return xScale(data[0].x)})
+            .attr("y1", function(){ return yScale(5)})
+            .attr("x2", function(data){ return xScale(data[data.length -1].x)})
+            .attr("y2", function(){ return yScale(5)})
             .style("stroke", "white")
             .style("stroke-width", "1px")
 
             svgDoc.select("g.nightblock")
-            .attr("transform", "translate(" + this.state.margin.yaxisMargin + ",200)")
+            .attr("transform", "translate(" + this.state.margin.yaxisMargin + "," + this.state.margin.top + ")")
             .append("rect")
-            .attr("x", function(){ return xScale(0)})
-            .attr("y", function(){ return yScale(8)})
-            .attr("width", function(){ return xScale(24)})
-            .attr("height", function(){ return yScale(8)})
+            .datum(data)
+            .attr("x", function(data){ return xScale(data[0].x)})
+            .attr("y", function(){ return yScale(5)})
+            .attr("width", function(data){ return xScale(data[data.length -1].x)})
+            .attr("height", function(){ return yScale(5)})
             .style("fill", "grblackey")
 
 
