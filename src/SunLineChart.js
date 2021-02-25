@@ -6,7 +6,7 @@ import { withStyles } from "@material-ui/core/styles";
 const styles = theme => ({
     
     svgContainer: {
-        marginTop: '-200px'
+        //marginTop: '-200px'
     },
     svgContent: {
         display: 'inlineBlock',
@@ -37,7 +37,7 @@ const c = 0.788775;
 
 
 
-const data = () => {
+let data = () => {
 
     var d = new Date();
         var hrs = d.getHours();
@@ -51,7 +51,7 @@ const data = () => {
     // obj.y = 0;
     // data.push(obj);
 
-      for(var i = (time - 1); i<(time + 24); i++){
+      for(var i = (time - 3); i<(time + 21); i++){
         var obj = {};
         obj.x = i;
         var modi = i % 24;
@@ -74,16 +74,17 @@ class SunLineChart extends Component{
         this.state = {
             height: 300,
             width: 600,
-            margin: { top: 50, right: 0, bottom: 5, left: 0, between: 20, yaxisMargin: 25 },
+            margin: { top: 120, right: 0, bottom: 5, left: 0, between: 20, yaxisMargin: 15 },
             timerInterval: null,
-            
-            
             data: data,
+            weatherData: {},
             time: 0.0,
             timeY: 0.0
         }
 
         var d = new Date();
+        var ts1 = d.getTime() - (1000 * 60 *60 * 3);
+        var ts2 = d.getTime() + (21 * 60 * 60 * 1000);
         var hrs = d.getHours();
         var mins = d.getMinutes();
         var minhrs = mins/60;
@@ -91,14 +92,23 @@ class SunLineChart extends Component{
 
         this.xScale = d3.scaleLinear()
             .range([0, this.state.width])
-            .domain([time, (time + 24)]);
+            .domain([(time - 3), (time + 21)]);
+
+        this.xScale2 = d3.scaleLinear()
+            .range([0, this.state.width])
+            .domain([ts1,ts2]);
         
         this.yScale = d3.scaleLinear()
             .range([(this.state.height), 0])
             .domain([0, 12]);
 
+        this.yScale2 = d3.scaleLinear()
+            .range([(this.state.height), 0])
+            .domain([0, 12]);
 
-        this.xAxis = d3.axisBottom();
+
+
+        this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//.ticks(5);;
 
         this.yAxis = d3.axisLeft(this.yScale).ticks(12);
 
@@ -108,6 +118,8 @@ class SunLineChart extends Component{
         this.getTimeDecimal = this.getTimeDecimal.bind(this);
         this.getTimeY = this.getTimeY.bind(this);
         this.getTimeFactor = this.getTimeFactor.bind(this);
+        this.updateData = this.updateData.bind(this);
+        this.getWeather = this.getWeather.bind(this);
     }
 
     lineChartRef = React.createRef();
@@ -120,10 +132,21 @@ class SunLineChart extends Component{
             var time = this.getTimeDecimal();
             var timeY = this.getTimeY(time);
             this.setState({ time: time, timeY: timeY });
+            this.updateData();
             this.redrawChart();
         }, 5000);
+
+        // let weatherTimerInterval = setInterval(()=>{
+        //     var weatherData = this.getWeather();
+        //     console.log(weatherData);
+        //     this.setState({ weatherData: weatherData });
+        // }, 30000);
+
+        //this.getWeather();
+               
         this.setState({ timerInterval: timerInterval });
         this.drawChart();
+
 
     }
 
@@ -131,7 +154,60 @@ class SunLineChart extends Component{
         clearInterval(this.state.timerInterval);
       }
 
+    getWeather() {
 
+        fetch("http://192.168.0.30:8090/weather")
+            .then(res => res.text())
+            .then(res => {
+                var data = JSON.parse(res);
+                //console.log( data);
+                var timeArray = data.weatherdata.product.time;
+                timeArray.forEach(el => {
+                    //console.log(el);
+                    var from = new Date(el.from);
+                    el.fromUTC = from.getTime();
+                    var to = new Date(el.to);
+                    el.toUTC = to.getTime();
+                    if(el.fromUTC === el.toUTC) {
+                        el.aa = false;
+                    } else {
+                        el.aa = true;
+                    }
+                });
+
+                return timeArray;
+                
+            })
+            .then(timeArray => {
+                this.setState({ weatherData: timeArray}); 
+            })
+            .catch(err => err);
+    }
+
+
+      updateData(){
+
+        var d = new Date();
+        var hrs = d.getHours();
+        var mins = d.getMinutes();
+        var minhrs = mins/60;
+        var time = hrs + minhrs;
+
+    var data = [];
+
+      for(var i = (time - 3); i<(time + 21); i++){
+        var obj = {};
+        obj.x = i;
+        var modi = i % 24;
+        var i4 = Math.pow(modi,4);
+        var i3 = Math.pow(modi,3);
+        var i2 = Math.pow(modi,2);
+        obj.y = (c4*i4) - (c3*i3) + (c2*i2) - (c1*(i%24)) + c;
+        data.push(obj);
+      }
+       this.setState((state) => ({data: data}));
+
+      }
 
       getTimeDecimal(){
 
@@ -170,26 +246,66 @@ class SunLineChart extends Component{
 
     redrawChart() {
 
-        //console.log("redrawChart() called ");
+        console.log("redrawChart() called ");
+
+        let data = this.state.data;
+        let wData = this.state.weatherData;
 
         var time = this.state.time;
         var timeY = this.state.timeY;
 
-        let xScale = this.xScale;
+        let xScale = this.xScale.domain([(time - 3), (time + 21)]);
         let yScale = this.yScale;
+        let xScale2 = this.xScale2;
+        let yScale2 = this.yScale2;
+
+        let xAxis = this.xAxis.scale(xScale);
+
         var svgDoc = d3.select('svg#linechartsvg');
 
-        svgDoc.select("sunpositionGlow")
+        // if(wData.length > 0){
+        //     svgDoc.select("g.rain")
+        //     .data(wData)
+        //     .enter().append("rect")
+        //     //.filter(function(d) { console.log(d.datatype); return  true })
+        //     .style("fill", "steelblue")
+        //     .attr("x", function(d) { return xScale2(d.fromUTC); })
+        //     .attr("width", 10)
+        //     .attr("y", 0)
+        //     .attr("height", function(d) { return yScale2(parseFloat("10.0"));})
+        //     ;
+        // }
+
+        //wData.forEach(d => { console.log(d.aa)});
+        
+
+        svgDoc.select("g.x.axis").call(xAxis);
+
+        svgDoc.select(".sunpositionGlow")
         .attr("cx", function(){ return xScale(time)})
         .attr("cy", function(){ return yScale(timeY)})
 
-        svgDoc.select("sunpositionCircle")
+        svgDoc.select(".sunpositionCircle")
             .attr("cx", function(){ return xScale(time)})
             .attr("cy", function(){ return yScale(timeY)})
 
-        svgDoc.select("sunpositionnightCircle")
+        svgDoc.select(".sunpositionnightCircle")
                 .attr("cx", function(){ return xScale(time)})
                 .attr("cy", function(){ return yScale(timeY)})
+
+
+        let assistsL = d3.line()
+            .curve(d3.curveMonotoneX)
+            .x(function (d) { return xScale(d.x); })
+            .y(function (d) { return yScale(d.y); });
+
+        let sunpath = svgDoc.select("g.sunpath");
+
+            sunpath.selectAll(".line")
+                .datum(data)
+                .attr("d", assistsL)
+
+
 
         var factor = this.getTimeFactor(time);
 
@@ -208,12 +324,15 @@ class SunLineChart extends Component{
 
         console.log("drawChart() called ");
         let data = this.state.data;
+        let wData = this.state.weatherData;
         
         var time = this.getTimeDecimal();
         var timeY = this.getTimeY(time);
 
         let xScale = this.xScale;
+        let xScale2 = this.xScale2;
         let yScale = this.yScale;
+        let yScale2 = this.yScale2;
         let xAxis = this.xAxis.scale(xScale);
         let yAxis = this.yAxis;
         var height = this.state.height;
@@ -226,13 +345,7 @@ class SunLineChart extends Component{
             .classed(st, true);
             ;
 
-            // svgDoc.select("g.x.axis")
-            // .attr("stroke", "white")
-            // .attr("transform", "translate(" + this.state.margin.yaxisMargin + "," + height + ")")
-            // //.class("domain")
-            // .attr("stroke", "white")
-            // .call(xAxis)
-            // .selectAll("text").style("text-anchor", "end").attr("dx", "-.8em").attr("dy", ".15em").attr("transform", "rotate(-65)");
+            
 
             //svgDoc.select("g.y.axis").attr("transform", "translate(" + this.state.margin.yaxisMargin + "," + 0 + ")").call(yAxis);
 
@@ -242,6 +355,8 @@ class SunLineChart extends Component{
             .curve(d3.curveMonotoneX)
             .x(function (d) { return xScale(d.x); })
             .y(function (d) { return yScale(d.y); });
+
+            
 
             let sunpath = svgDoc.select("g.sunpath")
                 .attr("transform", "translate(" + this.state.margin.yaxisMargin + "," + this.state.margin.top + ")");
@@ -262,7 +377,7 @@ class SunLineChart extends Component{
 	            feMerge.append("feMergeNode")
 		        .attr("in","SourceGraphic");
 
-                sunpath.append("path")
+            sunpath.append("path")
                 .datum(data)
                 .attr("class", "line")
                 .attr("d", assistsL)
@@ -353,11 +468,44 @@ class SunLineChart extends Component{
             .attr("x", function(data){ return xScale(data[0].x)})
             .attr("y", function(){ return yScale(5)})
             .attr("width", function(data){ return xScale(data[data.length -1].x)})
-            .attr("height", function(){ return yScale(5)})
+            .attr("height", function(){ return yScale(4)})
             .style("fill", "grblackey")
 
+            svgDoc.select("g.x.axis")
+            .attr("stroke", "white")
+            .attr("transform", "translate(" + this.state.margin.yaxisMargin + "," + 425 + ")")
+            //.class("domain")
+            .attr("stroke", "white")
+            .call(xAxis)
+            .selectAll("text")
+            .attr("fill", function(d){ return "red";});
 
-    }
+
+            // svgDoc.selectAll("g.rain")
+            // .data(wData)
+            // .enter().append("rect")
+            // .style("fill", "steelblue")
+            // .attr("x", function(d) { return xScale2(d.fromUTC); })
+            // .attr("width", 10)
+            // .attr("y", 0)
+            // .attr("height", function(d) { return yScale2(parseFloat(d.location.precipitation.maxvalue));});
+   
+            // var temp = svgDoc.select("g.rain");
+            // if(wData.length > 0){
+            //     console.log(wData.length);
+            //     temp
+            //     .data(wData)
+            //     .enter().append("rect")
+            //     //.filter(function(d) { console.log(d.datatype); return  true })
+            //     .style("fill", "steelblue")
+            //     .attr("x", function(d) { return xScale2(d.fromUTC); })
+            //     .attr("width", 10)
+            //     .attr("y", 0)
+            //     .attr("height", function(d) { return yScale2(parseFloat("10.0"));})
+            //     ;
+            // }
+   
+        }
 
     render() {
         console.log("rendering");
@@ -369,9 +517,7 @@ class SunLineChart extends Component{
                 
             <svg id="linechartsvg" >
             
-                <g className="x axis"></g>
-
-                <g className="y axis"></g>
+                
 
                 <g className="sunposition"></g>
 
@@ -379,13 +525,15 @@ class SunLineChart extends Component{
 
                 <g className="sunpositionnight"></g>
 
-                <g className="sunpath">
+                <g className="sunpath"></g>
 
-                </g>
+                <g className="x axis"></g>
 
-                
+                <g className="y axis"></g>
 
                 <g className="sunriseset"></g>
+
+                <g className="rain"></g>
             </svg>
         </div>
         )

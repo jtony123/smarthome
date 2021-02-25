@@ -7,11 +7,14 @@ import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import Chip from '@material-ui/core/Chip';
 import Avatar from '@material-ui/core/Avatar';
+import Button from '@material-ui/core/Button';
 
 import ReactPlayer from 'react-player/lazy';
 import * as Scroll from 'react-scroll';
 import { Link, Element, Events, animateScroll as scroll, scrollSpy, scroller } from 'react-scroll'
  
+
+
 
 
 const styles = theme => ({
@@ -25,9 +28,11 @@ const styles = theme => ({
   },
   dashboard: {
     backgroundColor: 'black',
-    marginBottom: '200px'
+    marginBottom: '200px',
+    height: '110vh'
   },
   svgContainer: {
+    //marginTop: '-200px'
 },
 svgContent: {
     display: 'inlineBlock',
@@ -37,7 +42,7 @@ svgContent: {
 },
 dashboardTempFont: {
 	color: 'white',
-	fontSize: '4.0em',
+	fontSize: '12vh',
 	textAlign: 'center',
 	margin: 0,
 	paddingTop: '25px',
@@ -66,9 +71,12 @@ class App extends Component {
                         windowSize: "",
                         };
 
-        this.handleClick=this.handleClick.bind(this);
+        this.handleClick = this.handleClick.bind(this);
+        //this.getWeather = this.getWeather.bind(this);
+        //this.openFullscreen = this.openFullscreen.bind(this);
 
     }
+
 
     
 
@@ -80,13 +88,13 @@ class App extends Component {
           .catch(err => err);
     }
 
-    getWeather() {
+  //   getWeather() {
 
-      fetch("http://192.168.0.30:8090/weather")
-          .then(res => res.text())
-          .then(res => console.log(res))
-          .catch(err => err);
-  }
+  //     fetch("http://192.168.0.30:8090/weather")
+  //         .then(res => res.json())
+  //         .then(data => {return data;})
+  //         .catch(err => err);
+  // }
 
 
     handleResize = e => {
@@ -106,6 +114,7 @@ class App extends Component {
 
     componentDidMount() {
 
+
       const windowSize = window.innerWidth;
       window.addEventListener("resize", this.handleResize);
 
@@ -114,38 +123,63 @@ class App extends Component {
         //elwidth: elwidth
       });
 
+
       this.callAPI();
       let apiTempReqTimer = setInterval(()=>{
                           this.callAPI();
                       },30000)
 
-      let apiWeatherReqTimer = setInterval(()=>{
-                        this.callAPI();
-                    },3600000)
+      // let apiWeatherReqTimer = setInterval(()=>{
+      //                   this.getWeather();
+      //               },3600000)
       
       this.setState({ apiTempReqTimer: apiTempReqTimer,
-        apiWeatherReqTimer: apiWeatherReqTimer
+        //apiWeatherReqTimer: apiWeatherReqTimer
                     });
 
-      Events.scrollEvent.register('begin', function(to, element) {
-        console.log('begin', arguments);
-      });
-
-      Events.scrollEvent.register('end', function(to, element) {
-        console.log('end', arguments);
-      });
-
-      scrollSpy.update();
     }
     
-    
+
+    openFullscreen() {
+
+
+      var elem = document.getElementById("root");
+
+
+      try {
+        if (elem.mozRequestFullscreen) { /* firefox */
+          elem.mozRequestFullscreen();
+          return;
+        }
+      } catch(err) {
+        console.log(err);
+      }
+      try {
+        if (elem.requestFullscreen) { /* chrome */
+          elem.requestFullscreen();
+          return;
+        }
+      } catch(err) {
+        console.log(err);
+      }
+
+      try {
+        if (elem.webkitRequestFullscreen) { /* Safari */
+          elem.webkitRequestFullscreen();
+          return;
+        }
+      } catch(err) {
+        console.log(err);
+      }
+    return;
+    }
+
+
     componentWillUnmount(){
       console.log("App componentWillUnmount");
       clearInterval(this.state.apiTempReqTimer);
       clearInterval(this.state.apiWeatherReqTimer);
       window.removeEventListener("resize", this.handleResize);
-      Events.scrollEvent.remove('begin');
-      Events.scrollEvent.remove('end');
     }
 
     render() {
@@ -171,11 +205,10 @@ class App extends Component {
         <Grid item xs={12} sm={4}>
           <p className = {classes.dashboardTempFont}>{this.state.apiResponse}&#176;</p>
         </Grid>
-        <Grid item xs={12}>
-          <Paper className={classes.paper}>Lots more to come</Paper>
-          
-        </Grid>
       </Grid>
+
+      <Button size="large" fullWidth={true} onClick={() => this.openFullscreen()}>Full Sceen Mode</Button>
+
       <ReactPlayer url="../videos/mov_bbb.mp4" width='100%' playing={true} loop={true} volume={0} playsinline={true}/>
       
     </div>

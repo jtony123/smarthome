@@ -10,7 +10,8 @@ const styles = theme => ({
     dashboardClockAlign: {
 		textAlign: 'center',
 		backgroundColor: 'rgba(0 0 0 /0%)',
-		position: 'relative',
+		position: 'absolute',
+		left: '10vw',
 		zIndex: 10,
 	},
 	dashboardClockTick: {
@@ -22,9 +23,9 @@ const styles = theme => ({
 	},
 	dashboardClockFont: {
 		color: 'white',
-		fontSize: '160px',
+		//fontSize: '120px',
 		//fontSize: '12.0em',
-		//fontSize: '20vw',
+		fontSize: '30vh',
 		fontWeight: 500,
 		margin: 0,
 		paddingLeft: '30px',
