@@ -28,8 +28,8 @@ const styles = theme => ({
   },
   dashboard: {
     backgroundColor: 'black',
-    marginBottom: '200px',
-    height: '110vh'
+    //marginBottom: '200px',
+    //height: '110vh'
   },
   svgContainer: {
     //marginTop: '-200px'
@@ -42,7 +42,7 @@ svgContent: {
 },
 dashboardTempFont: {
 	color: 'white',
-	fontSize: '12vh',
+	fontSize: '10vh',
 	textAlign: 'center',
 	margin: 0,
 	paddingTop: '25px',
@@ -196,16 +196,24 @@ class App extends Component {
 
           <div className={classes.root}>
       <Grid className={classes.dashboard} container spacing={2}>
-        <Grid item xs={12} sm={8}>
-        <Grid item xs={12}>
-            <Clock/>
-            <SunLineChart/>
+        <Grid item xs={12} sm={9}>
+              <Clock/>
         </Grid>
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <p className = {classes.dashboardTempFont}>{this.state.apiResponse}&#176;</p>
+        <Grid item xs={12} sm={3}>
+            <p className = {classes.dashboardTempFont}>{this.state.apiResponse}&#176;</p>
+          
+            <p className = {classes.dashboardTempFont}>50.0&#176;</p>
+          
         </Grid>
       </Grid>
+      <Grid className={classes.dashboard} container spacing={2}>
+        <Grid item xs={12} sm={12}>
+          <SunLineChart/>
+
+        </Grid>
+        </Grid>
+        
+      
 
       <Button size="large" fullWidth={true} onClick={() => this.openFullscreen()}>Full Sceen Mode</Button>
 
