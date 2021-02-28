@@ -22,7 +22,7 @@ const styles = theme => ({
 		animationIterationCount: 'infinite',
 	},
 	dashboardClockFont: {
-		color: 'white',
+		color: 'silver',
 		//fontSize: '120px',
 		//fontSize: '12.0em',
 		fontSize: '30vh',

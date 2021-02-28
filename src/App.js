@@ -84,7 +84,11 @@ class App extends Component {
 
       fetch("http://192.168.0.30:8090")
           .then(res => res.text())
-          .then(res => this.setState({ apiResponse: res }))
+
+          .then(res => {
+            var temps = JSON.parse(res);
+            this.setState({ apiResponse: temps})
+          })
           .catch(err => err);
     }
 
@@ -186,10 +190,9 @@ class App extends Component {
 
       const { classes } = this.props;
 
-      var s1 = this.state.apiResponse;
-      var s2 = String.fromCharCode(176);
+      var sA = this.state.apiResponse.sensorA;
+      var sB = this.state.apiResponse.sensorB;
 
-      const bufferTemp = s1.concat(s2);
       
         return (
 
@@ -200,9 +203,9 @@ class App extends Component {
               <Clock/>
         </Grid>
         <Grid item xs={12} sm={3}>
-            <p className = {classes.dashboardTempFont}>{this.state.apiResponse}&#176;</p>
+            <p className = {classes.dashboardTempFont}>{sA}&#176;</p>
           
-            <p className = {classes.dashboardTempFont}>50.0&#176;</p>
+            <p className = {classes.dashboardTempFont}>{sB}&#176;</p>
           
         </Grid>
       </Grid>
