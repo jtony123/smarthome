@@ -41,7 +41,7 @@ svgContent: {
     left: 0,
 },
 dashboardTempFont: {
-	color: 'white',
+	color: 'silver',
 	fontSize: '10vh',
 	textAlign: 'center',
 	margin: 0,

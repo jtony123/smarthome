@@ -65,10 +65,11 @@ class SunLineChart extends Component{
             width: 600,
             margin: { top: 0, right: 0, bottom: 5, left: 0, between: 20, yaxisMargin: 15 },
             timerInterval: null,
+            weatherTimerInterval: null,
             data: data,
             //rainData: [],
             //tempData: [],
-            weatherData: [{"time": 0, "temperature": 0}],
+            weatherData: [],//[{"time": 0, "temperature": 0}],
             time: 0.0,
             timeY: 0.0
         }
@@ -171,22 +172,21 @@ this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//
             this.redrawChart();
         }, 5000);
 
-        // let weatherTimerInterval = setInterval(()=>{
-        //     var weatherData = this.getWeather();
-        //     console.log(weatherData);
-        //     this.setState({ weatherData: weatherData });
-        // }, 30000);
+        let weatherTimerInterval = setInterval(()=>{
+            this.getWeather();
+        }, 3600000); // 60 * 60 * 1000 every 30 minutes
+
+        this.setState({ timerInterval: timerInterval,
+            weatherTimerInterval, weatherTimerInterval});
 
         this.getWeather();
-               
-        this.setState({ timerInterval: timerInterval });
         this.drawChart();
-
-
     }
 
     componentWillUnmount() {
         clearInterval(this.state.timerInterval);
+        clearInterval(this.state.weatherTimerInterval);
+        
       }
 
     getWeather() {
@@ -195,7 +195,7 @@ this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//
             .then(res => res.text())
             .then(res => {
                 var data = JSON.parse(res);
-                console.log( data);
+                //console.log( data);
                 var extractedData = {};
                 var rainData = [];
                 var tempData = [];
@@ -224,8 +224,7 @@ this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//
                     time += diff * 24;
 
                     if((time % 2) === 0){
-                        console.log(time + " ==> " + todayDate + " : " + dDate);
-
+                       
                         var from = new Date(el.from);
                         el.fromUTC = from.getTime();
                         var to = new Date(el.to);
@@ -298,7 +297,7 @@ this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//
                 
             })
             .then(dataArray => {
-                console.log(dataArray);
+                //console.log(dataArray);
                 this.setState({ weatherData: dataArray
                 }); 
             })
@@ -419,41 +418,64 @@ this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//
             .attr("d", sunpathLine)
 
 
-        //let tempCircles = svgDoc.select("g.temperature");
         
-        let tempCircles = svgDoc.select("g.temperature");
-        let tempCircle = tempCircles.selectAll(".tempCircle")
+        let tempGroup = svgDoc.select("g.temperature");
+        tempGroup.selectAll('circle')
                 .data(weatherData.filter(function(d){ 
-                         return d.hasOwnProperty("time") &&
-                                 d.hasOwnProperty("temperature") &&
-                                 d.time >= (time -4) ; }))
-        
-
-
-                tempCircle.enter()
-                .append("circle")
+                    return d.hasOwnProperty("time") 
+                           && d.hasOwnProperty("temperature") ; }))
+                .join('circle')
                 .attr("class", "tempCircle")
                 .attr("cx", function(d) { return xScale(d.time); })
                 .attr("cy", function(d) { return yTempScale(5); })
-                .attr("r", 14)
+                .attr("r", 11)
                 .style("stroke", function(d){ return colorScale(d.temperature);})
-                .style("stroke-width", "1.0px")
+                .style("stroke-width", "2.0px")
                 .style("stroke-dasharray", "none")
 
-                let tempText = tempCircles.selectAll(".tempText")
+            tempGroup.selectAll('text')
                 .data(weatherData.filter(function(d){ 
                          return d.hasOwnProperty("time") &&
-                                 d.hasOwnProperty("temperature") &&
-                                 d.time >= (time -4) ; }))
-
-                tempText.enter()
-                .append("text")
+                                 d.hasOwnProperty("temperature"); }))
+                .join('text')
                 .attr("class", "tempText")
                 .attr("x", function(d) { return xScale(d.time); })
                 .attr("y", function(d) { return yTempScale(4.8); })
                 .text(function(d){ return (d.temperature).toFixed(1)})
                 .attr("fill", function(d){ return colorScale(d.temperature);})
                 .attr("dy", "2")
+                .attr("font-weight", "bold")
+                .attr("text-anchor", "middle")
+                .style("font-size", "10")
+
+        let rainGroup = svgDoc.select("g.rain");
+            rainGroup.selectAll('rect')
+                .data(weatherData.filter(function(d){ 
+                    return d.hasOwnProperty("time") 
+                           && d.hasOwnProperty("rain") ; }))
+                .join('rect')
+                .attr("class", "rainRect")
+                .attr("x", function(d) { return xScale(d.time) - 9; })
+                .attr("y", function(d) { return yTempScale(5); })
+                .attr("width", function(d) { return 18; })
+                .attr("height", 40)
+                .attr("rx", 9)
+                .style("stroke", "silver")
+                .style("stroke-width", "0.5px")
+                .style("stroke-dasharray", "none")
+
+            rainGroup.selectAll('text')
+                .data(weatherData.filter(function(d){ 
+                         return d.hasOwnProperty("time") &&
+                                 d.hasOwnProperty("rain"); }))
+                .join('text')
+                .attr("class", "rainText")
+                .attr("x", function(d) { return xScale(d.time); })
+                .attr("y", function(d) { return yTempScale(2); })
+                .text(function(d){ return (d.rain.probability)})
+                .attr("fill", "blue")
+                .attr("dy", "2")
+                .attr("font-weight", "bold")
                 .attr("text-anchor", "middle")
                 .style("font-size", "10")
 
@@ -642,11 +664,11 @@ this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//
 
 
             let tempCircles = svgDoc.select("g.temperature")
-                .attr("transform", "translate(" + this.state.margin.yaxisMargin + "," + 26 + ")");
-
-
-            tempCircles.selectAll("circle")
-                .data(weatherData)
+                .attr("transform", "translate(" + this.state.margin.yaxisMargin + "," + 26 + ")")
+                .selectAll("circle")
+                .data(weatherData.filter(function(d){ 
+                    return d.hasOwnProperty("time") 
+                           && d.hasOwnProperty("temperature"); }))
                 .enter()
                 .append("circle")
                 .attr("class", "tempCircle")
@@ -657,68 +679,23 @@ this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//
                 .style("stroke-width", "1px")
                 .style("stroke-dasharray", "none")
 
-            tempCircles.selectAll("text")
-                .data(weatherData)
+                let rainRects = svgDoc.select("g.rain")
+                .attr("transform", "translate(" + this.state.margin.yaxisMargin + "," + 50 + ")")
+                .selectAll("rect")
+                .data(weatherData.filter(function(d){ 
+                    return d.hasOwnProperty("time") 
+                           && d.hasOwnProperty("rain"); }))
                 .enter()
-                .append("text")
-                .attr("class", "tempText")
+                .append("rect")
+                .attr("class", "rainRect")
                 .attr("x", function(d) { return xScale(d.time); })
                 .attr("y", function(d) { return yTempScale(5); })
-                .text(function(d){ return (d.temperature).toFixed(1)})
-                .attr("fill", "red")
-                .style("font-size", "10")
-                .style("color", "red")
+                .attr("width", 11)
+                .attr("height", 2)
+                .style("stroke", "blue")
+                .style("stroke-width", "2.0px")
+                .style("stroke-dasharray", "none")
 
-            // tempPath.selectAll("text")
-            // .attr("class", "tempLabels")
-            // .data(weatherData)
-            // .enter()
-            // .append("text")
-            // .attr("x", function(d) { return xScale(d.time); })
-            // .attr("y", function(d) { return yTempScale(d.temperature); })
-            // .text(function(d){ return d.temperature})
-
-            // tempPath.append("defs").append("linearGradient")
-            //     .attr("id", "temperatureGradient")
-            //     .attr("x1", "49%")
-            //     .attr("y1", "0%")
-            //     .attr("x2", "51%")
-            //     .attr("y2", "100%")
-            //   .selectAll("stop")
-            //     .data([
-            //       {offset: "0%", color: "rgb(255,13,13)"},
-            //       {offset: "8%", color: "rgb(255,13,13)"},
-            //       {offset: "75%", color: "rgb(255,161,158)"},
-            //       {offset: "99%", color: "rgb(117,115,255)"},
-            //       {offset: "100%", color: "rgb(117,115,255)"}
-            //     ])
-            //   .enter().append("stop")
-            //     .attr("offset", function(d) { return d.offset; })
-            //     .attr("stop-color", function(d) { return d.color; })
-
-            // let tempArea = d3.area()
-            // .x(function(d){ return xScale(d.time);})
-            // .y1(yTempScale(0))
-            // .y0(function(d){ return yTempScale(d.temperature); });
-
-            // tempPath.append("path")
-            //     .datum(weatherData)
-            //     .attr("class", "tempArea")
-            //     .attr("d", tempArea)
-            //     .style("stroke-width", "2.0px")
-            //     .style("stroke", "black")
-            //     .style("fill", "url(#temperatureGradient)")
-            //     ;
-
-
-            // tempPath.selectAll("text")
-            // .attr("class", "tempLabels")
-            // .data(weatherData)
-            // .enter()
-            // .append("text")
-            // .attr("x", function(d) { return xScale(d.time); })
-            // .attr("y", function(d) { return yTempScale(d.temperature); })
-            // .text(function(d){ return d.temperature})
 
    
         }
