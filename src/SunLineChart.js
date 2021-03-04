@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import * as d3 from 'd3';
 
 import { withStyles } from "@material-ui/core/styles";
-import Rainy_1 from './Rainy_1.js';
+import WeatherIconDefs from './WeatherIconDefs.js';
 
 const styles = theme => ({
     
@@ -14,7 +14,8 @@ const styles = theme => ({
         position: 'absolute',
         top: 0,
         left: 0,
-    }
+    },
+
   });
 
 
@@ -423,7 +424,7 @@ this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//
                 .join('circle')
                 .attr("class", "tempCircle")
                 .attr("cx", function(d) { return xScale(d.time); })
-                .attr("cy", function(d) { return yTempScale(5); })
+                .attr("cy", function(d) { return yScale(4); })
                 .attr("r", 13)
                 .style("stroke", function(d){ return colorScale(d.temperature);})
                 .style("stroke-width", "1.5px")
@@ -436,7 +437,7 @@ this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//
                 .join('text')
                 .attr("class", "tempText")
                 .attr("x", function(d) { return xScale(d.time); })
-                .attr("y", function(d) { return yTempScale(4.8); })
+                .attr("y", function(d) { return yTempScale(2.4); })
                 .text(function(d){ return (d.temperature).toFixed(1)})
                 .attr("fill", function(d){ return colorScale(d.temperature);})
                 .attr("dy", "2")
@@ -445,39 +446,45 @@ this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//
                 .style("font-size", "12")
 
         let rainGroup = svgDoc.select("g.rain");
-            rainGroup.selectAll('rect')
-                .data(weatherData.filter(function(d){ 
-                    return d.hasOwnProperty("time") 
-                           && d.hasOwnProperty("rain") 
-                           //&& d.rain.probability > 0
-                           ; }))
-                .join('rect')
-                .attr("class", "rainRect")
-                .attr("x", function(d) { return xScale(d.time) - 9; })
-                .attr("y", function(d) { return yTempScale(5); })
-                .attr("width", function(d) { return 18; })
-                .attr("height", 40)
-                .attr("rx", 9)
-                .style("stroke", "silver")
-                .style("stroke-width", "0.5px")
-                .style("stroke-dasharray", "none")
+            // rainGroup.selectAll('rect')
+            //     .data(weatherData.filter(function(d){ 
+            //         return d.hasOwnProperty("time") 
+            //                && d.hasOwnProperty("rain") 
+            //                && d.rain.probability > 0
+            //                ; }))
+            //     .join('rect')
+            //     .attr("class", "rainRect")
+            //     .attr("x", function(d) { return xScale(d.time) - 9; })
+            //     .attr("y", function(d) { return yTempScale(5); })
+            //     .attr("width", function(d) { return 18; })
+            //     .attr("height", 40)
+            //     .attr("rx", 9)
+            //     .style("stroke", "silver")
+            //     .style("stroke-width", "0.5px")
+            //     .style("stroke-dasharray", "none")
 
-            rainGroup.selectAll('text')
-                .data(weatherData.filter(function(d){ 
-                         return d.hasOwnProperty("time") &&
-                                 d.hasOwnProperty("rain"); }))
-                .join('text')
-                .attr("class", "rainText")
-                .attr("x", function(d) { return xScale(d.time); })
-                .attr("y", function(d) { return yTempScale(2); })
-                .text(function(d){ return (d.rain.probability)})
-                .attr("fill", "blue")
-                .attr("dy", "2")
-                .attr("font-weight", "bold")
-                .attr("text-anchor", "middle")
-                .style("font-size", "10")
+            // rainGroup.selectAll('text')
+            //     .data(weatherData.filter(function(d){ 
+            //              return d.hasOwnProperty("time") &&
+            //                      d.hasOwnProperty("rain"); }))
+            //     .join('text')
+            //     .attr("class", "rainText")
+            //     .attr("x", function(d) { return xScale(d.time); })
+            //     .attr("y", function(d) { return yTempScale(2); })
+            //     .text(function(d){ return (d.rain.probability)})
+            //     .attr("fill", "blue")
+            //     .attr("dy", "2")
+            //     .attr("font-weight", "bold")
+            //     .attr("text-anchor", "middle")
+            //     .style("font-size", "10")
 
-                let symbolGroup = svgDoc.select("g.symbols");
+
+
+            // TODO *************
+            // place rain probability on top of cloud :)
+
+
+        let symbolGroup = svgDoc.select("g.symbols");
                 
                 symbolGroup.selectAll("use")
                 .data(weatherData.filter(function(d){ 
@@ -488,7 +495,44 @@ this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//
                 .attr("class", "symbols")
                 .attr("x", function(d) { return xScale(d.time) - 30; })
                 .attr("y", function(d) { return yTempScale(5); })
-                .attr("xlink:href", "#rainy")
+                .attr("xlink:href", function(d){
+                    var n = d.time % 24;
+                    console.log(n);
+                    if(n < 7 || n > 21 ){
+
+                        // TODO: map the expected rainfall values 
+                        // to rainy_* 
+                        if(d.cloudiness > 80){
+                            return "#cloudy-night-3";
+
+                        }
+                        if(d.cloudiness > 60){
+                            return "#cloudy-night-2";
+                        }
+                        if(d.cloudiness > 40){
+                            return "#cloudy-night-1";
+                        }
+                        return "#night";
+                    } else {
+                        if(d.cloudiness > 80){
+                            return "#cloudy";
+                        }
+                        if(d.cloudiness > 60){
+                            return "#cloudy-day-3";
+                        }
+                        if(d.cloudiness > 40){
+                            return "#cloudy-day-2";
+                        }
+                        if(d.cloudiness > 20){
+                            return "#cloudy-day-1";
+                        }
+                        return "#day";
+
+                    }
+                }
+                )
+                    
+                    
 
 
         var factor = this.getTimeFactor(time);
@@ -647,9 +691,9 @@ this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//
             .append("line")
             .datum(data)
             .attr("x1", function(data){ return xScale(data[0].x)})
-            .attr("y1", function(){ return yScale(5)})
+            .attr("y1", function(){ return yScale(4)})
             .attr("x2", function(data){ return xScale(data[data.length -1].x)})
-            .attr("y2", function(){ return yScale(5)})
+            .attr("y2", function(){ return yScale(4)})
             .style("stroke", "silver")
             .style("stroke-width", "1px")
 
@@ -658,7 +702,7 @@ this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//
             .append("rect")
             .datum(data)
             .attr("x", function(data){ return xScale(data[0].x)})
-            .attr("y", function(){ return yScale(5)})
+            .attr("y", function(){ return yScale(4)})
             .attr("width", function(data){ return xScale(data[data.length -1].x)})
             .attr("height", function(){ return yScale(4)})
             .style("fill", "grblackey")
@@ -685,31 +729,31 @@ this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//
                 .append("circle")
                 .attr("class", "tempCircle")
                 .attr("cx", function(d) { return xScale(d.time); })
-                .attr("cy", function(d) { return yTempScale(5); })
+                .attr("cy", function(d) { return yScale(4); })
                 .attr("r", 10)
                 .style("stroke", "silver")
                 .style("stroke-width", "1px")
                 .style("stroke-dasharray", "none")
 
-                let rainRects = svgDoc.select("g.rain")
-                .attr("transform", "translate(" + this.state.margin.yaxisMargin + "," + 50 + ")")
-                .selectAll("rect")
-                .data(weatherData.filter(function(d){ 
-                    return d.hasOwnProperty("time") 
-                           && d.hasOwnProperty("rain"); }))
-                .enter()
-                .append("rect")
-                .attr("class", "rainRect")
-                .attr("x", function(d) { return xScale(d.time); })
-                .attr("y", function(d) { return yTempScale(5); })
-                .attr("width", 11)
-                .attr("height", 2)
-                .style("stroke", "blue")
-                .style("stroke-width", "2.0px")
-                .style("stroke-dasharray", "none")
+                // let rainRects = svgDoc.select("g.rain")
+                // .attr("transform", "translate(" + this.state.margin.yaxisMargin + "," + 50 + ")")
+                // .selectAll("rect")
+                // .data(weatherData.filter(function(d){ 
+                //     return d.hasOwnProperty("time") 
+                //            && d.hasOwnProperty("rain"); }))
+                // .enter()
+                // .append("rect")
+                // .attr("class", "rainRect")
+                // .attr("x", function(d) { return xScale(d.time); })
+                // .attr("y", function(d) { return yTempScale(5); })
+                // .attr("width", 11)
+                // .attr("height", 2)
+                // .style("stroke", "blue")
+                // .style("stroke-width", "2.0px")
+                // .style("stroke-dasharray", "none")
 
                 let symbols = svgDoc.select("g.symbols")
-                .attr("transform", "translate(" + this.state.margin.yaxisMargin + "," + 75 + ")")
+                .attr("transform", "translate(" + this.state.margin.yaxisMargin + "," + 70 + ")")
                 .selectAll("use")
                 .data(weatherData.filter(function(d){ 
                     return d.hasOwnProperty("time") 
@@ -719,7 +763,7 @@ this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//
                 .attr("class", "symbols")
                 .attr("x", function(d) { return xScale(d.time) -30; })
                 .attr("y", function(d) { return yTempScale(5); })
-                .attr("xlink:href", "#rainy")
+                .attr("xlink:href", "#rainy-1")
 
 
    
@@ -734,59 +778,10 @@ this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//
             <div className={classes.svgContainer} ref={this.lineChartRef}>
                 
             <svg id="linechartsvg" >
-                <defs>
-                    <filter id="blur" width="200%" height="200%">
-                        <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
-                        <feOffset dx="0" dy="4" result="offsetblur" />
-                        <feComponentTransfer>
-                            <feFuncA type="linear" slope="0.05" />
-                        </feComponentTransfer>
-                        <feMerge>
-                            <feMergeNode />
-                            <feMergeNode in="SourceGraphic" />
-                        </feMerge>
-                    </filter>
-                    <g filter="url(#blur)" id="rainy-1">
-        <g id="rainy" transform="translate(20,10)">
-            <g transform="translate(0,16), scale(1.2)">
-                <g class="am-weather-sun">
-                    <g>
-                        <line fill="none" stroke="orange" stroke-linecap="round" stroke-width="2" transform="translate(0,9)" x1="0" x2="0" y1="0" y2="3"/>
-                    </g>
-                    <g transform="rotate(45)">
-                        <line fill="none" stroke="orange" stroke-linecap="round" stroke-width="2" transform="translate(0,9)" x1="0" x2="0" y1="0" y2="3"/>
-                    </g>
-                    <g transform="rotate(90)">
-                        <line fill="none" stroke="orange" stroke-linecap="round" stroke-width="2" transform="translate(0,9)" x1="0" x2="0" y1="0" y2="3"/>
-                    </g>
-                    <g transform="rotate(135)">
-                        <line fill="none" stroke="orange" stroke-linecap="round" stroke-width="2" transform="translate(0,9)" x1="0" x2="0" y1="0" y2="3"/>
-                    </g>
-                    <g transform="rotate(180)">
-                        <line fill="none" stroke="orange" stroke-linecap="round" stroke-width="2" transform="translate(0,9)" x1="0" x2="0" y1="0" y2="3"/>
-                    </g>
-                    <g transform="rotate(225)">
-                        <line fill="none" stroke="orange" stroke-linecap="round" stroke-width="2" transform="translate(0,9)" x1="0" x2="0" y1="0" y2="3"/>
-                    </g>
-                    <g transform="rotate(270)">
-                        <line fill="none" stroke="orange" stroke-linecap="round" stroke-width="2" transform="translate(0,9)" x1="0" x2="0" y1="0" y2="3"/>
-                    </g>
-                    <g transform="rotate(315)">
-                        <line fill="none" stroke="orange" stroke-linecap="round" stroke-width="2" transform="translate(0,9)" x1="0" x2="0" y1="0" y2="3"/>
-                    </g>
-                </g>
-                <circle cx="0" cy="0" fill="orange" r="5" stroke="orange" stroke-width="2"/>
-            </g>
-            <g>
-                <path d="M47.7,35.4c0-4.6-3.7-8.2-8.2-8.2c-1,0-1.9,0.2-2.8,0.5c-0.3-3.4-3.1-6.2-6.6-6.2c-3.7,0-6.7,3-6.7,6.7c0,0.8,0.2,1.6,0.4,2.3    c-0.3-0.1-0.7-0.1-1-0.1c-3.7,0-6.7,3-6.7,6.7c0,3.6,2.9,6.6,6.5,6.7l17.2,0C44.2,43.3,47.7,39.8,47.7,35.4z" fill="#57A0EE" stroke="white" stroke-linejoin="round" stroke-width="1.5" transform="translate(-15,-5), scale(0.85)"/>
-            </g>
-        </g>
-        <g transform="translate(34,46), rotate(10)">
-        </g>
-    </g>
+                
+                <WeatherIconDefs/>
 
-
-                </defs>
+                
             
                 <g className="sunposition"></g>
 
