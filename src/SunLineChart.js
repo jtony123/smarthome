@@ -3,18 +3,20 @@ import * as d3 from 'd3';
 
 import { withStyles } from "@material-ui/core/styles";
 import WeatherIconDefs from './WeatherIconDefs.js';
+import * as SunCalc from 'suncalc';
 
 const styles = theme => ({
     
     svgContainer: {
-        marginTop: '-75px'
+        //marginTop: '-75px'
     },
     svgContent: {
-        display: 'inlineBlock',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-    },
+        marginTop: "-200px"
+        // display: 'inlineBlock',
+        // position: 'absolute',
+        // top: 0,
+        // left: 0,
+    }
 
   });
 
@@ -65,7 +67,12 @@ class SunLineChart extends Component{
         this.state = {
             height: 300,
             width: 600,
-            margin: { top: 0, right: 0, bottom: 5, left: 0, between: 20, yaxisMargin: 15 },
+            margin: { top: 30, 
+                right: 0, 
+                bottom: 5, 
+                left: 0, 
+                between: 20, 
+                yaxisMargin: 15 },
             timerInterval: null,
             weatherTimerInterval: null,
             data: data,
@@ -73,7 +80,8 @@ class SunLineChart extends Component{
             //tempData: [],
             weatherData: [],//[{"time": 0, "temperature": 0}],
             time: 0.0,
-            timeY: 0.0
+            timeY: 0.0, 
+            solarTimes: null
         }
 
         var d = new Date();
@@ -153,6 +161,7 @@ this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//
         this.getTimeFactor = this.getTimeFactor.bind(this);
         this.updateData = this.updateData.bind(this);
         this.getWeather = this.getWeather.bind(this);
+        this.calculateSolarTimes = this.calculateSolarTimes.bind(this);
     }
 
     lineChartRef = React.createRef();
@@ -171,12 +180,15 @@ this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//
 
         let weatherTimerInterval = setInterval(()=>{
             this.getWeather();
+            this.calculateSolarTimes();
         }, 3600000); // 60 * 60 * 1000 every 30 minutes
 
         this.setState({ timerInterval: timerInterval,
-            weatherTimerInterval, weatherTimerInterval});
+            weatherTimerInterval, weatherTimerInterval
+        });
 
         this.getWeather();
+        this.calculateSolarTimes();
         this.drawChart();
     }
 
@@ -185,6 +197,14 @@ this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//
         clearInterval(this.state.weatherTimerInterval);
         
       }
+
+    calculateSolarTimes (){
+
+        var solarTimes = SunCalc.getTimes(new Date(), 53.39, -9.27 );
+        this.setState({ 
+            solarTimes: solarTimes
+        });
+    } 
 
     getWeather() {
         console.log("fetching weather");
@@ -363,7 +383,7 @@ this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//
 
     redrawChart() {
 
-        console.log("redrawChart() called ");
+        //console.log("redrawChart() called ");
 
         let data = this.state.data;
         let weatherData = this.state.weatherData;
@@ -497,7 +517,7 @@ this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//
                 .attr("y", function(d) { return yTempScale(5); })
                 .attr("xlink:href", function(d){
                     var n = d.time % 24;
-                    console.log(n);
+                    //console.log(n);
                     if(n < 7 || n > 21 ){
 
                         // TODO: map the expected rainfall values 
@@ -564,12 +584,10 @@ this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//
         let yAxis = this.yAxis.scale(yScale);
         var height = this.state.height;
 
-        let st = styles.svgContent;
         var svgDoc = d3.select('svg#linechartsvg')
             //.attr("height", this.state.height)
             .attr("preserveAspectRatio", "xMinYMin meet")
             .attr("viewBox", "0 0 600 600")
-            .classed(st, true);
             ;
 
             //svgDoc.select("g.y.axis").attr("transform", "translate(" + this.state.margin.yaxisMargin + "," + 0 + ")").call(yAxis);
@@ -710,17 +728,24 @@ this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//
             
 
             svgDoc.select("g.x.axis")
-            .attr("stroke", "white")
-            .attr("transform", "translate(" + this.state.margin.yaxisMargin + "," + 150 + ")")
+            .attr("transform", "translate(" + this.state.margin.yaxisMargin + "," + 190 + ")")
             .attr("stroke", "silver")
             .call(xAxis)
-            .selectAll("text")
-            .attr("font-size", 10)
-            ;
+            .select(".domain")
+            .style("display", "none")
+            
+
+            svgDoc.select("g.x.axis")
+                .selectAll("text")
+                .attr("stroke", "silver")
+
+            svgDoc.select("g.x.axis")
+                .selectAll("line")
+                .style("display", "none")
 
 
             let tempCircles = svgDoc.select("g.temperature")
-                .attr("transform", "translate(" + this.state.margin.yaxisMargin + "," + 26 + ")")
+                .attr("transform", "translate(" + this.state.margin.yaxisMargin + "," + 80 + ")")
                 .selectAll("circle")
                 .data(weatherData.filter(function(d){ 
                     return d.hasOwnProperty("time") 
@@ -753,7 +778,7 @@ this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//
                 // .style("stroke-dasharray", "none")
 
                 let symbols = svgDoc.select("g.symbols")
-                .attr("transform", "translate(" + this.state.margin.yaxisMargin + "," + 70 + ")")
+                .attr("transform", "translate(" + this.state.margin.yaxisMargin + "," + 110 + ")")
                 .selectAll("use")
                 .data(weatherData.filter(function(d){ 
                     return d.hasOwnProperty("time") 
@@ -770,14 +795,14 @@ this.xAxis = d3.axisBottom().tickFormat(function(d) { return (d % 24)+":00"});//
         }
 
     render() {
-        console.log("rendering");
+        //console.log("rendering");
 
         const { classes } = this.props;
 
         return(
             <div className={classes.svgContainer} ref={this.lineChartRef}>
                 
-            <svg id="linechartsvg" >
+            <svg id="linechartsvg" className={classes.svgContent}>
                 
                 <WeatherIconDefs/>
 
